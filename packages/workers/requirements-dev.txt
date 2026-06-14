@@ -1,0 +1,2 @@
+# 단위테스트용 (결정적 로직만 검증 — httpx/playwright는 모듈에서 lazy import라 불필요)
+pytest>=8.0

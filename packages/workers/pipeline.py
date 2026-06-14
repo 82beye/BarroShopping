@@ -1,35 +1,25 @@
-"""바로쇼핑 생성 파이프라인 — 4단계 골격 (FR-1~4).
+"""바로쇼핑 생성 파이프라인 — 4단계 오케스트레이션 (FR-1~4).
 
-각 단계는 P2-4~7에서 실제 구현. 현재는 인터페이스/실행 순서만 정의(스텁).
+각 단계 구현은 stage 모듈에 위임. 실제 실행에는 자격증명/대상이 필요:
+  1) scrape : Playwright + D1 대상 사이트·셀렉터        [scrape.py / P2-7]
+  2) script : ANTHROPIC_API_KEY                          [script.py / P2-4]
+  3) voice  : ELEVENLABS_API_KEY                         [voice.py  / P2-5]
+  4) render : @shortsgen/render (Remotion) — backend.render_stage 또는 subprocess [P2-6]
 
-  1) scrape : 상품 URL/ID → 이미지·스펙·리뷰 (Playwright)            [FR-1, P2-7]
-  2) script : 상품 데이터 → 훅·씬·자막 YAML (LLM, 스타일 3종)        [FR-2, P2-4]
-  3) voice  : 스크립트 → TTS 오디오 + BGM 동기화 (ElevenLabs)        [FR-3, P2-5]
-  4) render : inputProps → 9:16 MP4 (@shortsgen/render 호출)        [FR-4, P2-6]
+prod 워커(Celery/Redis)가 이 순서를 큐로 구동. dev는 backend 인메모리 워커가
+render 단계만 실제 수행(나머지는 키 없으면 스텁).
 """
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any
+
+from . import scrape, script, voice  # noqa: F401  (단계 구현)
+
+STAGES = ("scrape", "script", "voice", "render")
 
 
-def scrape(product_ref: str) -> dict[str, Any]:
-    """상품 참조(URL/ID) → productSchema 호환 dict. 랜덤 지연·백오프(최대 3)."""
-    raise NotImplementedError("P2-7: Playwright 스크래퍼")
-
-
-def script(product: dict[str, Any], style: str = "정보형") -> dict[str, Any]:
-    """상품 dict → 훅/씬/자막 YAML(dict). 15~30초 클램프."""
-    raise NotImplementedError("P2-4: LLM 스크립트 생성")
-
-
-def voice(script_yaml: dict[str, Any]) -> dict[str, Any]:
-    """스크립트 → 씬별 오디오 + BGM. 씬 타이밍 동기화."""
-    raise NotImplementedError("P2-5: ElevenLabs TTS + BGM")
-
-
-def render(input_props: dict[str, Any]) -> str:
-    """inputProps → MP4 경로. `pnpm --filter @shortsgen/render render --props=...` 위임."""
-    raise NotImplementedError("P2-6: Remotion 렌더 통합")
-
-
-PIPELINE: list[Callable[..., Any]] = [scrape, script, voice, render]
+def run(url: str, selectors: dict[str, str], style: str = "정보형") -> dict[str, Any]:
+    """상품 URL → 스크립트까지 (음성·렌더는 호출부에서 자격증명/렌더러와 결합)."""
+    product = scrape.scrape(url, selectors)
+    spec = script.generate(product, style)
+    return {"product": product, "script": spec}
