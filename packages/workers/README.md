@@ -34,3 +34,6 @@ playwright install chromium       # 스크래퍼용
 # script: Claude Code 설치·로그인 필요 (claude CLI). 전역 스킬 barroShopping 사용.
 ```
 재시도(최대 3)·백오프·dead-letter·캐시 재사용은 prod 큐(Celery/Redis) 전환 시(PRD §11 / P4-5).
+
+## 쿠팡 (P2-7) — 스크래핑 대신 파트너스 OpenAPI
+쿠팡은 봇 방어(403 Access Denied)로 Playwright 헤드리스 스크래핑이 차단된다(셀렉터는 `scrape_coupang.py`에 튜닝됨, 스크랩 가능한 사이트엔 동작). **운영은 `coupang_partners.py`(파트너스 OpenAPI, HMAC)** 로 상품검색·deeplink를 받는다 — 약관 친화적·안정적. 키: `COUPANG_ACCESS_KEY`/`COUPANG_SECRET_KEY`.
