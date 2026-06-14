@@ -1,6 +1,6 @@
 """랜딩 페이지 생성 (P3) — 상품별 랜딩 + 프로필(link-in-bio) 인덱스 + 도메인 관리.
 
-- 상품별 랜딩: out/Product/{id}/index.html (커버 이미지 + 상품정보 + 어필리에이트 구매 버튼 + 공정위)
+- 상품별 랜딩: out/Product/{id}/index.html (영상 자동재생·반복 + 상품정보 + 어필리에이트 구매 버튼 + 공정위)
 - 프로필 인덱스: out/index.html (브랜드 + 등록된 전체 상품 링크 목록, 최신 먼저)
 - 도메인: landing.config.json({base_url, brand}) 또는 env LANDING_BASE_URL/LANDING_BRAND
 
@@ -88,7 +88,7 @@ def product_page_html(
 .disc{{font-size:12px;color:var(--mut);line-height:1.5}}.back{{display:inline-block;margin-top:18px;color:var(--mut);font-size:13px;text-decoration:none}}
 </style></head><body><div class="wrap">
 <div class="brand"><span class="dot"></span>{_esc(cfg['brand'])}</div>
-<img class="cover" src="cover.png" alt="{_esc(name)}" onerror="this.style.display='none'">
+<video class="cover" autoplay loop muted playsinline preload="auto" poster="cover.png"><source src="video.mp4" type="video/mp4"></video>
 <div class="hook">{_esc(hook)}</div>
 <div class="name">{_esc(name)}</div>
 <div class="price">{price_html}</div>
