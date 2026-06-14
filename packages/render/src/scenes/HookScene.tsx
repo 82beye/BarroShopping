@@ -7,7 +7,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import type { Theme } from "../schema";
-import { Easing, useFade } from "../utils";
+import { Easing, fitFontSize, useFade } from "../utils";
 import { FONT_NUM } from "../load-fonts";
 
 type Props = {
@@ -46,6 +46,10 @@ export const HookScene: React.FC<Props> = ({
     easing: Easing.easeOut,
   });
 
+  // 긴 훅도 디자인 영역(폭 ~860px) 안에 들어오도록 글자 수 기준 자동 축소
+  const titleSize = fitFontSize(title, 168, 5, 44);
+  const subSize = fitFontSize([sub], 46, 18, 32);
+
   return (
     <AbsoluteFill
       style={{
@@ -77,10 +81,11 @@ export const HookScene: React.FC<Props> = ({
       <div style={{ transform: `translateY(${titleY}px)`, opacity: titlePop }}>
         <div
           style={{
-            fontSize: 168,
+            fontSize: titleSize,
             fontWeight: 900,
             lineHeight: 1.02,
             letterSpacing: -4,
+            wordBreak: "keep-all",
           }}
         >
           {title[0]}
@@ -88,10 +93,11 @@ export const HookScene: React.FC<Props> = ({
         <div style={{ position: "relative", display: "inline-block" }}>
           <span
             style={{
-              fontSize: 168,
+              fontSize: titleSize,
               fontWeight: 900,
               lineHeight: 1.02,
               letterSpacing: -4,
+              wordBreak: "keep-all",
             }}
           >
             {title[1]}
@@ -117,7 +123,7 @@ export const HookScene: React.FC<Props> = ({
           marginTop: 56,
           opacity: subFade,
           transform: `translateY(${interpolate(subFade, [0, 1], [16, 0])}px)`,
-          fontSize: 46,
+          fontSize: subSize,
           fontWeight: 600,
           color: theme.muted,
           fontFamily: FONT_NUM,

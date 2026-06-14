@@ -72,9 +72,10 @@ export const ProductScene: React.FC<Props> = ({
   const hasDiscount = dc > 0; // 원가>판매가일 때만 스탬프·취소선 표시
   const hasRating = Boolean(product.rating); // 평점 있을 때만 평점 행 표시
 
-  // 긴 상품명/스펙이 박스를 넘지 않도록 글자 수 기준 자동 축소
+  // 긴 상품명/스펙/CTA가 박스를 넘지 않도록 글자 수 기준 자동 축소
   const nameSize = fitFontSize(product.name, 78, 10);
   const subSize = fitFontSize([product.sub], 38, 24);
+  const ctaSize = fitFontSize([cta], 50, 16, 32);
 
   return (
     <AbsoluteFill
@@ -287,9 +288,11 @@ export const ProductScene: React.FC<Props> = ({
           transform: `scale(${pulse})`,
           background: theme.accent,
           color: "#fff",
-          fontSize: 50,
+          fontSize: ctaSize,
           fontWeight: 800,
-          padding: "34px 0",
+          lineHeight: 1.15,
+          wordBreak: "keep-all",
+          padding: "30px 28px",
           width: "100%",
           textAlign: "center",
           borderRadius: 999,
