@@ -1,0 +1,86 @@
+{
+  "brandName": "바로마켓",
+  "eyebrow": "WEEKEND DEAL · 일요일 마감",
+  "hookTitle": ["이번 주말", "주방 특가"],
+  "hookSub": "5가지 · 최대 52% OFF",
+  "cta": "지금 구매하기 →",
+  "outroTitle": ["놓치면", "후회해요"],
+  "outroSub": "재고 소진 시 조기 종료",
+  "outroCta": "프로필 링크에서 구매 ↗",
+
+  "fps": 30,
+  "hookDuration": 60,
+  "productDuration": 90,
+  "outroDuration": 90,
+
+  "theme": {
+    "accent": "#FF4D2E",
+    "ink": "#1A1714",
+    "muted": "#8C8377",
+    "stageFrom": "#FBF7F0",
+    "stageTo": "#EFE6D7"
+  },
+
+  "products": [
+    {
+      "emoji": "🍳",
+      "category": "주방",
+      "name": ["인덕션 호환", "코팅 프라이팬 28cm"],
+      "sub": "6중 코팅 · 눌어붙음 없음",
+      "rating": "4.8",
+      "reviews": "4,012",
+      "was": 49000,
+      "now": 23900,
+      "tint": "#FFE7E1",
+      "tintDeep": "#D9492C"
+    },
+    {
+      "emoji": "🔪",
+      "category": "주방",
+      "name": ["독일 스테인리스", "셰프 나이프"],
+      "sub": "통세척 가능 · 손잡이 일체형",
+      "rating": "4.9",
+      "reviews": "1,884",
+      "was": 79000,
+      "now": 39000,
+      "tint": "#E7EEFF",
+      "tintDeep": "#3A5BD9"
+    },
+    {
+      "emoji": "☕",
+      "category": "가전",
+      "name": ["반자동", "에스프레소 머신"],
+      "sub": "20bar · 밀크 스티머 포함",
+      "rating": "4.7",
+      "reviews": "6,530",
+      "was": 219000,
+      "now": 129000,
+      "tint": "#F0E7DD",
+      "tintDeep": "#8A5A2B"
+    },
+    {
+      "emoji": "🍵",
+      "category": "주방",
+      "name": ["이중 진공", "보온 텀블러 500ml"],
+      "sub": "12시간 보온 · 누수 방지",
+      "rating": "4.8",
+      "reviews": "9,140",
+      "was": 32000,
+      "now": 17900,
+      "tint": "#E2F4EC",
+      "tintDeep": "#1F9D63"
+    },
+    {
+      "emoji": "🧊",
+      "category": "가전",
+      "name": ["저소음", "급속 제빙기"],
+      "sub": "6분 제빙 · 자동 세척",
+      "rating": "4.6",
+      "reviews": "2,275",
+      "was": 159000,
+      "now": 89000,
+      "tint": "#E7F3FF",
+      "tintDeep": "#2D86C4"
+    }
+  ]
+}

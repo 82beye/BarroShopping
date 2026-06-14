@@ -1,0 +1,32 @@
+# 의존성
+node_modules/
+
+# 렌더 결과물
+out/
+build/
+dist/
+
+# Remotion 캐시/번들
+.remotion/
+
+# 로그
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 환경변수/시크릿
+.env
+.env.*
+!.env.example
+
+# OS / 에디터
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# 대용량 상품 이미지를 LFS로 관리하지 않을 경우 주석 해제
+# public/*.png
+# public/*.jpg
