@@ -1,7 +1,8 @@
 """스크립트 생성 (FR-2 / P2-4) — 상품 → 훅·씬·자막.
 
-LLM 호출은 Anthropic API 키가 아니라 **Claude Code 스킬(shorts-script)** 을 이용한다
-(사용자 결정 2026-06-14). 워커가 `claude -p` 헤드리스로 호출 → JSON 스크립트 산출.
+LLM 호출은 Anthropic API 키가 아니라 **Claude Code 스킬(barroShopping / shorts-script)** 을
+이용한다 (사용자 결정 2026-06-14). 헤드리스 `claude -p`에서는 `/명령` 문법이 동작하지 않으므로,
+스킬 본문을 프롬프트에 주입해 결정적으로 사용한다(전역 스킬 우선, 프로젝트 폴백).
 build_prompt/parse_script 는 결정적(단위테스트 가능).
 """
 from __future__ import annotations
@@ -9,9 +10,29 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+from pathlib import Path
 from typing import Any
 
 STYLES = ("정보형", "감성", "다이나믹")
+
+# 전역 스킬 우선 → 프로젝트 폴백
+_SKILL_PATHS = (
+    Path.home() / ".claude" / "skills" / "barroshopping" / "SKILL.md",
+    Path(__file__).resolve().parents[2] / ".claude" / "skills" / "shorts-script" / "SKILL.md",
+)
+
+
+def skill_body() -> str:
+    """등록된 스킬 본문(frontmatter 제거)을 로드. 없으면 빈 문자열."""
+    for p in _SKILL_PATHS:
+        if p.exists():
+            text = p.read_text(encoding="utf-8")
+            if text.startswith("---"):
+                parts = text.split("---", 2)
+                if len(parts) == 3:
+                    text = parts[2]
+            return text.strip()
+    return ""
 
 
 def build_prompt(product: dict[str, Any], style: str = "정보형") -> str:
@@ -54,4 +75,8 @@ def _call_claude_code(prompt: str, timeout: int = 120) -> str:
 def generate(product: dict[str, Any], style: str = "정보형") -> dict[str, Any]:
     if style not in STYLES:
         raise ValueError(f"알 수 없는 스타일: {style}")
-    return parse_script(_call_claude_code(build_prompt(product, style)))
+    # 등록된 스킬 본문을 주입해 결정적으로 사용 (헤드리스 -p는 /명령 미지원)
+    skill = skill_body()
+    task = build_prompt(product, style)
+    prompt = f"{skill}\n\n---\n\n{task}" if skill else task
+    return parse_script(_call_claude_code(prompt))
