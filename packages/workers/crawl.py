@@ -103,7 +103,7 @@ def extract_jsonld(html: str) -> dict[str, Any]:
                 "brand": brand_name,
                 "now": offers.get("price"),
                 "was": offers.get("highPrice") or offers.get("price"),
-                "rating": rating.get("ratingValue"),
+                "rating": _clean_rating(rating.get("ratingValue")),
                 "reviews": rating.get("reviewCount") or rating.get("ratingCount"),
                 "sub": prod.get("description"),
             }
