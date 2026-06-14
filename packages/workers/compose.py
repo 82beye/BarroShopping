@@ -43,5 +43,9 @@ def compose_catalog(
         "outroSub": "수량 소진 시 조기 마감",
         "outroCta": "프로필 링크에서 구매 ↗",
         "theme": theme or dict(WARM_THEME),
-        "products": products,
+        # image가 falsy(None/"")면 키 제거 — render Zod(z.string().optional())는 null 거부, 부재는 허용
+        "products": [
+            {k: v for k, v in p.items() if not (k == "image" and not v)}
+            for p in products
+        ],
     }

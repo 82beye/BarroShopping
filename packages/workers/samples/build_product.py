@@ -1,6 +1,6 @@
 """상품 1건 빌드 — 수집→스크립트→compose→렌더→발행메타→랜딩→등록(프로필 갱신).
 
-산출물은 out/상품/{id}/ (props.json·video.mp4·cover.png·publish.md·index.html) + out/index.html(프로필).
+산출물은 out/Product/{id}/ (props.json·video.mp4·cover.png·publish.md·index.html) + out/index.html(프로필).
 
 사용:
   python samples/build_product.py --id 1234 --html URL|FILE [--headed] [--affiliate URL]
@@ -59,7 +59,7 @@ def main() -> None:
         spec = {"hook": ["오늘만", "단독 특가"], "cta": "지금 구매하기 →"}
     print("    hook:", spec.get("hook"), "| cta:", spec.get("cta"))
 
-    print("[3] compose → out/상품/%s/props.json" % args.id)
+    print("[3] compose → out/Product/%s/props.json" % args.id)
     catalog = compose.compose_catalog([clean], spec)
     P = assets.paths(args.id)
     P["props"].write_text(json.dumps(catalog, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -73,8 +73,14 @@ def main() -> None:
             ["npx", "remotion", "render", "ShoppingCatalog", str(vid_rel), f"--props={P['props']}"],
             cwd=str(rd), check=True,
         )
+        # 커버는 하단 진행 네비 숨김(hideNav) 전용 props로 still 생성
+        cover_props = P["dir"] / "cover.props.json"
+        cover_props.write_text(
+            json.dumps({**catalog, "hideNav": True}, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
         subprocess.run(
-            ["npx", "remotion", "still", "ShoppingCatalog", str(cov_rel), "--frame=110", f"--props={P['props']}"],
+            ["npx", "remotion", "still", "ShoppingCatalog", str(cov_rel), "--frame=110", f"--props={cover_props}"],
             cwd=str(rd), check=True,
         )
 
@@ -90,7 +96,7 @@ def main() -> None:
         created=datetime.date.today().isoformat(),
     )
     profile = landing.build_profile()
-    print(f"[done] out/상품/{args.id}/ (props·publish·index.html{'·video·cover' if args.render else ''}) · 프로필 {profile}")
+    print(f"[done] out/Product/{args.id}/ (props·publish·index.html{'·video·cover' if args.render else ''}) · 프로필 {profile}")
 
 
 if __name__ == "__main__":

@@ -57,6 +57,8 @@ export const catalogSchema = z.object({
   bgm: z.string().optional(),
   /** (선택) 배경음악 볼륨 0~1. 미지정 시 0.5 */
   bgmVolume: z.number().min(0).max(1).optional(),
+  /** (선택) 하단 진행 네비 숨김 — 커버 이미지(still) 생성 시 true */
+  hideNav: z.boolean().optional(),
 
   theme: themeSchema,
   products: z.array(productSchema).min(1),

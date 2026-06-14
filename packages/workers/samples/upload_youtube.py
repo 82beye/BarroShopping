@@ -17,12 +17,18 @@ from workers import assets, youtube as yt  # noqa: E402
 
 
 def _title_tags(publish_md: str, fallback: str) -> tuple[str, list[str]]:
-    lines = [ln for ln in publish_md.splitlines()]
-    # publish.md: [0]공정위 [1]'' [2]hook(제목) [3]cta ... 마지막 줄=해시태그
-    title = lines[2].strip() if len(lines) > 2 and lines[2].strip() else fallback
+    """publish.md에서 제목·태그 추출 (라인 인덱스 의존 대신 내용 기반)."""
+    lines = [ln.strip() for ln in publish_md.splitlines()]
+    # 제목: 공정위/링크/해시태그가 아닌 첫 비어있지 않은 줄
+    title = fallback
+    for ln in lines:
+        if ln and not ln.startswith(("이 영상은", "👉", "#")):
+            title = ln
+            break
+    # 태그: '#'로 시작하는 마지막 줄(공정위 라인 제외)
     tags: list[str] = []
     for ln in reversed(lines):
-        if ln.strip().startswith("#"):
+        if ln.startswith("#"):
             tags = [t.lstrip("#") for t in ln.split() if t.startswith("#")]
             break
     return title, tags

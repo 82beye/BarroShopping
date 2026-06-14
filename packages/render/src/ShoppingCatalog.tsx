@@ -52,6 +52,7 @@ export const ShoppingCatalog: React.FC<CatalogProps> = (props) => {
     outroCta,
     bgm,
     bgmVolume,
+    hideNav,
     theme,
     products,
   } = props;
@@ -161,47 +162,49 @@ export const ShoppingCatalog: React.FC<CatalogProps> = (props) => {
         </Sequence>
       ))}
 
-      {/* 하단 씬 진행 점 + 전체 프로그레스 */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 50,
-          left: 64,
-          right: 64,
-          zIndex: 10,
-        }}
-      >
-        <div style={{ display: "flex", gap: 10, marginBottom: 22 }}>
-          {timeline.map((_, i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                height: 8,
-                borderRadius: 4,
-                background:
-                  i <= activeScene ? theme.ink : hexToRgba(theme.ink, 0.16),
-              }}
-            />
-          ))}
-        </div>
+      {/* 하단 씬 진행 점 + 전체 프로그레스 (hideNav=커버 생성 시 숨김) */}
+      {!hideNav && (
         <div
           style={{
-            height: 6,
-            borderRadius: 3,
-            background: hexToRgba(theme.ink, 0.12),
-            overflow: "hidden",
+            position: "absolute",
+            bottom: 50,
+            left: 64,
+            right: 64,
+            zIndex: 10,
           }}
         >
+          <div style={{ display: "flex", gap: 10, marginBottom: 22 }}>
+            {timeline.map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  flex: 1,
+                  height: 8,
+                  borderRadius: 4,
+                  background:
+                    i <= activeScene ? theme.ink : hexToRgba(theme.ink, 0.16),
+                }}
+              />
+            ))}
+          </div>
           <div
             style={{
-              width: `${progress * 100}%`,
-              height: "100%",
-              background: theme.accent,
+              height: 6,
+              borderRadius: 3,
+              background: hexToRgba(theme.ink, 0.12),
+              overflow: "hidden",
             }}
-          />
+          >
+            <div
+              style={{
+                width: `${progress * 100}%`,
+                height: "100%",
+                background: theme.accent,
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </AbsoluteFill>
   );
 };
