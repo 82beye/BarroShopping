@@ -1,5 +1,5 @@
 {
-  "base_url": "https://82beye.github.io/BarroShopping",
+  "base_url": "https://barroshopping.pages.dev",
   "brand": "바로쇼핑",
-  "_note": "프로필 링크 도메인. GitHub Pages·정적호스트·VPS 어디든. base_url 비우면 상대경로만 사용. env LANDING_BASE_URL/LANDING_BRAND 로 덮어쓰기 가능."
+  "_note": "프로필/상품 랜딩 도메인. Cloudflare Pages 무료 서브도메인(상업적 이용 허용·영상 대역폭 무제한). 배포: scripts/deploy.sh (wrangler pages deploy out/). 커스텀 도메인 연결 시 그 주소로 교체. base_url 비우면 상대경로만 사용. env LANDING_BASE_URL/LANDING_BRAND 로 덮어쓰기 가능."
 }
