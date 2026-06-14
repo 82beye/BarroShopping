@@ -1,0 +1,45 @@
+{
+  "_도움말": "이 파일을 복사해 값을 채운 뒤 `scripts/render.sh 내파일.json 출력이름` 으로 렌더하세요. _로 시작하는 키는 무시되니 작성 후 지워도 됩니다. 필드 설명은 docs/INPUT_GUIDE.md 참고.",
+  "brandName": "바로쇼핑",
+  "eyebrow": "TODAY ONLY · 자정 마감",
+  "hookTitle": ["첫 줄 (예: 오늘의)", "둘째 줄 (예: 단독 특가)"],
+  "hookSub": "예: 딱 3가지 · 최대 47% OFF",
+  "cta": "지금 구매하기 →",
+  "outroTitle": ["마무리 첫 줄", "마무리 둘째 줄"],
+  "outroSub": "예: 수량 소진 시 조기 마감",
+  "outroCta": "프로필 링크에서 구매 ↗",
+  "theme": {
+    "accent": "#FF4D2E",
+    "ink": "#1A1714",
+    "muted": "#8C8377",
+    "stageFrom": "#FBF7F0",
+    "stageTo": "#EFE6D7"
+  },
+  "products": [
+    {
+      "emoji": "📦",
+      "image": "(선택) https://... 또는 public/파일명.png — 없으면 emoji 사용",
+      "category": "카테고리",
+      "name": ["상품명 1줄", "(선택) 2줄"],
+      "sub": "한 줄 스펙/설명",
+      "rating": "4.8",
+      "reviews": "1,234",
+      "was": 100000,
+      "now": 59000,
+      "tint": "#E9F0FF",
+      "tintDeep": "#2E5BFF"
+    },
+    {
+      "emoji": "📦",
+      "category": "카테고리",
+      "name": ["둘째 상품명"],
+      "sub": "한 줄 스펙/설명",
+      "rating": "4.7",
+      "reviews": "987",
+      "was": 80000,
+      "now": 49000,
+      "tint": "#FFEFE6",
+      "tintDeep": "#FF6B2E"
+    }
+  ]
+}
