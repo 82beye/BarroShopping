@@ -1,4 +1,4 @@
-# 바로마켓 쇼핑 카탈로그 쇼츠 (Remotion)
+# 바로쇼핑 쇼핑 카탈로그 쇼츠 (Remotion)
 
 쇼핑 쇼츠 상품 카탈로그를 **코드로 렌더링**하는 Remotion 프로젝트입니다.
 모든 상품·브랜드·타이밍·테마는 `inputProps`(zod 스키마)로 주입되며,
@@ -50,7 +50,7 @@ npm run still             # → out/cover.png (frame 75)
 
 ```jsonc
 {
-  "brandName": "바로마켓",
+  "brandName": "바로쇼핑",
   "eyebrow": "TODAY ONLY · 자정 마감",
   "hookTitle": ["오늘의", "단독 특가"],
   "hookSub": "딱 3가지 · 최대 47% OFF",
@@ -130,7 +130,7 @@ shopping-catalog/
    ├─ index.ts                # registerRoot
    ├─ Root.tsx                # <Composition> + calculateMetadata
    ├─ schema.ts               # zod inputProps 스키마
-   ├─ default-props.ts        # 폴백 데이터(바로마켓 3종, warm)
+   ├─ default-props.ts        # 폴백 데이터(바로쇼핑 3종, warm)
    ├─ ShoppingCatalog.tsx     # 메인 컴포지션(동적 타임라인)
    ├─ load-fonts.ts           # Noto Sans KR + Archivo
    ├─ utils.ts                # easing/포맷/페이드 헬퍼

@@ -6,7 +6,7 @@ import type { CatalogProps } from "./schema";
  * 실제 운영에서는 --props=xxx.json 또는 renderMedia({inputProps}) 로 덮어씀.
  */
 export const defaultCatalogProps: CatalogProps = {
-  brandName: "바로마켓",
+  brandName: "바로쇼핑",
   eyebrow: "TODAY ONLY · 자정 마감",
   hookTitle: ["오늘의", "단독 특가"],
   hookSub: "딱 3가지 · 최대 47% OFF",

@@ -2,7 +2,7 @@
   "name": "shopping-catalog-shorts",
   "version": "1.0.0",
   "private": true,
-  "description": "바로마켓 쇼핑 카탈로그 쇼츠 — Remotion + inputProps",
+  "description": "바로쇼핑 쇼핑 카탈로그 쇼츠 — Remotion + inputProps",
   "scripts": {
     "dev": "remotion studio",
     "studio": "remotion studio",
