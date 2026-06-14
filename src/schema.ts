@@ -53,6 +53,11 @@ export const catalogSchema = z.object({
   productDuration: z.number().int().positive().default(90),
   outroDuration: z.number().int().positive().default(90),
 
+  /** (선택) 배경음악: http(s) URL 또는 public/ 파일명. 없으면 무음 유지 */
+  bgm: z.string().optional(),
+  /** (선택) 배경음악 볼륨 0~1. 미지정 시 0.5 */
+  bgmVolume: z.number().min(0).max(1).optional(),
+
   theme: themeSchema,
   products: z.array(productSchema).min(1),
 });

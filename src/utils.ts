@@ -44,3 +44,19 @@ export const useFade = (durationInFrames: number, inF = 8, outF = 10) => {
 /** image가 URL이면 그대로, 아니면 public/ staticFile 경로로 변환 */
 export const resolveSrc = (image: string, staticFile: (p: string) => string) =>
   /^https?:\/\//.test(image) ? image : staticFile(image);
+
+/**
+ * 긴 텍스트가 박스를 넘지 않도록 가장 긴 줄의 글자 수 기준으로 폰트 크기를 자동 축소.
+ * 가장 긴 줄이 maxCharsPerLine 이하이면 base 유지, 넘으면 비례 축소(min 하한 적용).
+ * 예: fitFontSize(["초경량 무선 노이즈캔슬링 이어버드"], 78, 10) → 더 작은 값
+ */
+export const fitFontSize = (
+  lines: string[],
+  base: number,
+  maxCharsPerLine: number,
+  min = Math.round(base * 0.6)
+) => {
+  const longest = Math.max(1, ...lines.map((l) => l.length));
+  if (longest <= maxCharsPerLine) return base;
+  return Math.max(min, Math.round((base * maxCharsPerLine) / longest));
+};

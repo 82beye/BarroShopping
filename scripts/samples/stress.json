@@ -1,0 +1,91 @@
+{
+  "brandName": "바로쇼핑",
+  "eyebrow": "TODAY ONLY · 자정 마감",
+  "hookTitle": ["6개 한정", "초특가 모음"],
+  "hookSub": "딱 6가지 · 최대 60% OFF",
+  "cta": "지금 구매하기 →",
+  "outroTitle": ["지금", "바로 담으세요"],
+  "outroSub": "수량 소진 시 조기 마감",
+  "outroCta": "프로필 링크에서 구매 ↗",
+  "theme": {
+    "accent": "#FF4D2E",
+    "ink": "#1A1714",
+    "muted": "#8C8377",
+    "stageFrom": "#FBF7F0",
+    "stageTo": "#EFE6D7"
+  },
+  "products": [
+    {
+      "emoji": "🎧",
+      "category": "오디오",
+      "name": ["초경량 노이즈캔슬링", "프리미엄 무선 이어버드"],
+      "sub": "최대 36시간 재생 · IPX5 생활방수 · 멀티포인트",
+      "rating": "4.9",
+      "reviews": "12,840",
+      "was": 159000,
+      "now": 79000,
+      "tint": "#E9F0FF",
+      "tintDeep": "#2E5BFF"
+    },
+    {
+      "emoji": "👟",
+      "category": "신발",
+      "name": ["경량 데일리", "러닝화"],
+      "sub": "통기성 메시 · 반발 쿠션",
+      "rating": "4.8",
+      "reviews": "8,210",
+      "was": 129000,
+      "now": 64900,
+      "tint": "#FFEFE6",
+      "tintDeep": "#FF6B2E"
+    },
+    {
+      "emoji": "⌚",
+      "category": "웨어러블",
+      "name": ["AMOLED 스마트워치"],
+      "sub": "혈중 산소 · 수면 분석 · 7일 배터리",
+      "rating": "4.7",
+      "reviews": "5,932",
+      "was": 219000,
+      "now": 109000,
+      "tint": "#EAFBF1",
+      "tintDeep": "#15B86A"
+    },
+    {
+      "emoji": "☕",
+      "category": "주방",
+      "name": ["반자동 에스프레소", "홈카페 머신"],
+      "sub": "15bar · 스팀완드 · 우유거품",
+      "rating": "4.6",
+      "reviews": "3,401",
+      "was": 299000,
+      "now": 159000,
+      "tint": "#F3ECFF",
+      "tintDeep": "#7A3CFF"
+    },
+    {
+      "emoji": "🧴",
+      "category": "뷰티",
+      "name": ["저자극 수분", "앰플 세트"],
+      "sub": "히알루론산 5종 · 민감성 OK",
+      "rating": "4.9",
+      "reviews": "21,008",
+      "was": 89000,
+      "now": 39900,
+      "tint": "#FFEAF2",
+      "tintDeep": "#FF3E8A"
+    },
+    {
+      "emoji": "🔌",
+      "category": "가전",
+      "name": ["100W 초고속", "GaN 멀티충전기"],
+      "sub": "노트북+폰 동시 · 4포트",
+      "rating": "4.8",
+      "reviews": "6,775",
+      "was": 69000,
+      "now": 34900,
+      "tint": "#EAF6FF",
+      "tintDeep": "#1E90FF"
+    }
+  ]
+}

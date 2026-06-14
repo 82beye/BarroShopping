@@ -1,8 +1,15 @@
 import React, { useMemo } from "react";
-import { AbsoluteFill, Sequence, useCurrentFrame, useVideoConfig } from "remotion";
+import {
+  AbsoluteFill,
+  Audio,
+  Sequence,
+  staticFile,
+  useCurrentFrame,
+  useVideoConfig,
+} from "remotion";
 import type { CatalogProps } from "./schema";
 import { FONT_KR } from "./load-fonts";
-import { hexToRgba } from "./utils";
+import { hexToRgba, resolveSrc } from "./utils";
 import { HookScene } from "./scenes/HookScene";
 import { ProductScene } from "./scenes/ProductScene";
 import { OutroScene } from "./scenes/OutroScene";
@@ -43,6 +50,8 @@ export const ShoppingCatalog: React.FC<CatalogProps> = (props) => {
     outroTitle,
     outroSub,
     outroCta,
+    bgm,
+    bgmVolume,
     theme,
     products,
   } = props;
@@ -65,6 +74,11 @@ export const ShoppingCatalog: React.FC<CatalogProps> = (props) => {
         overflow: "hidden",
       }}
     >
+      {/* (선택) 배경음악 — bgm이 지정된 경우에만 재생, 없으면 무음 */}
+      {bgm ? (
+        <Audio src={resolveSrc(bgm, staticFile)} volume={bgmVolume ?? 0.5} />
+      ) : null}
+
       {/* 상단 강조색 글로우 */}
       <AbsoluteFill
         style={{

@@ -44,8 +44,16 @@ export const OutroScene: React.FC<Props> = ({
     easing: Easing.easeOut,
   });
 
-  // 아웃트로엔 최대 4개까지 미리보기 타일
-  const tiles = products.slice(0, 4);
+  // 아웃트로 미리보기 타일 — 상품 수에 맞춰 최대 6개, 가용 폭(900px)에 맞게 크기 자동 조정
+  const tiles = products.slice(0, 6);
+  const tileGap = 24;
+  const tileSize = Math.min(
+    170,
+    Math.floor((900 - tileGap * Math.max(0, tiles.length - 1)) / tiles.length)
+  );
+  const tileImg = Math.round(tileSize * 0.72);
+  const tileEmoji = Math.round(tileSize * 0.5);
+  const tileRadius = Math.round(tileSize * 0.24);
 
   return (
     <AbsoluteFill
@@ -59,19 +67,28 @@ export const OutroScene: React.FC<Props> = ({
         padding: "0 90px",
       }}
     >
-      <div style={{ display: "flex", gap: 28, marginBottom: 56 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: tileGap,
+          marginBottom: 56,
+          flexWrap: "wrap",
+          justifyContent: "center",
+          maxWidth: 900,
+        }}
+      >
         {tiles.map((p, i) => (
           <div
             key={i}
             style={{
-              width: 150,
-              height: 150,
-              borderRadius: 36,
+              width: tileSize,
+              height: tileSize,
+              borderRadius: tileRadius,
               background: p.tint,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 76,
+              fontSize: tileEmoji,
               overflow: "hidden",
               transform: `scale(${spring({
                 frame: frame - i * 4,
@@ -83,7 +100,7 @@ export const OutroScene: React.FC<Props> = ({
             {p.image ? (
               <Img
                 src={resolveSrc(p.image, staticFile)}
-                style={{ width: 110, height: 110, objectFit: "contain" }}
+                style={{ width: tileImg, height: tileImg, objectFit: "contain" }}
               />
             ) : (
               p.emoji

@@ -9,7 +9,15 @@ import {
   useVideoConfig,
 } from "remotion";
 import type { Product, Theme } from "../schema";
-import { discount, Easing, hexToRgba, resolveSrc, useFade, won } from "../utils";
+import {
+  discount,
+  Easing,
+  fitFontSize,
+  hexToRgba,
+  resolveSrc,
+  useFade,
+  won,
+} from "../utils";
 import { FONT_NUM } from "../load-fonts";
 
 type Props = {
@@ -61,6 +69,10 @@ export const ProductScene: React.FC<Props> = ({
   const pulse = 1 + Math.sin((frame / fps) * 4.2) * 0.02;
 
   const dc = discount(product.was, product.now);
+
+  // 긴 상품명/스펙이 박스를 넘지 않도록 글자 수 기준 자동 축소
+  const nameSize = fitFontSize(product.name, 78, 10);
+  const subSize = fitFontSize([product.sub], 38, 24);
 
   return (
     <AbsoluteFill
@@ -148,7 +160,7 @@ export const ProductScene: React.FC<Props> = ({
       >
         <div
           style={{
-            fontSize: 78,
+            fontSize: nameSize,
             fontWeight: 900,
             lineHeight: 1.08,
             letterSpacing: -2,
@@ -164,7 +176,7 @@ export const ProductScene: React.FC<Props> = ({
         </div>
         <div
           style={{
-            fontSize: 38,
+            fontSize: subSize,
             fontWeight: 600,
             color: theme.muted,
             marginTop: 18,
