@@ -1,27 +1,19 @@
 {
-  "name": "shopping-catalog-shorts",
-  "version": "1.0.0",
+  "name": "shortsgen",
+  "version": "0.1.0",
   "private": true,
-  "description": "바로쇼핑 쇼핑 카탈로그 쇼츠 — Remotion + inputProps",
+  "description": "바로쇼핑(ShortsGen) — e커머스 상품 → 쇼핑 쇼츠 자동 생성·다채널 발행 모노레포",
   "scripts": {
-    "dev": "remotion studio",
-    "studio": "remotion studio",
-    "render": "remotion render ShoppingCatalog out/video.mp4",
-    "render:props": "remotion render ShoppingCatalog out/video.mp4 --props=./input-props.example.json",
-    "still": "remotion still ShoppingCatalog out/cover.png --frame=75",
-    "upgrade": "remotion upgrade"
-  },
-  "dependencies": {
-    "@remotion/cli": "^4.0.0",
-    "@remotion/google-fonts": "^4.0.0",
-    "@remotion/zod-types": "^4.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "remotion": "^4.0.0",
-    "zod": "^3.23.0"
+    "render": "pnpm --filter @shortsgen/render render",
+    "render:props": "pnpm --filter @shortsgen/render render:props",
+    "studio": "pnpm --filter @shortsgen/render studio",
+    "still": "pnpm --filter @shortsgen/render still",
+    "smoke": "pnpm --filter @shortsgen/render smoke",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "biome check .",
+    "format": "biome format --write ."
   },
   "devDependencies": {
-    "@types/react": "^19.0.0",
-    "typescript": "^5.5.0"
+    "@biomejs/biome": "^1.9.4"
   }
 }

@@ -1,5 +1,7 @@
 # 바로쇼핑 (ShortsGen) — 구현 스텝 (Implementation Plan)
 
+> P2-1 재구성 후 렌더 코드는 packages/render/ 하위입니다 (본문 src/... 경로는 packages/render/src/...).
+
 > `docs/PRD.md` v0.2의 로드맵(§13)·기능요구(§8 FR)·데이터모델(§9·§10)을 **실행 가능한 빌드 스텝(WBS)** 으로 분해한 문서.
 > 스텝 ID = `P{phase}-{n}`. 상태 = ☐ 미착수 · ◐ 진행 · ☑ 완료.
 > 현재 시작점: **Remotion 렌더 레이어만 구현(~15%)**, 나머지는 미구현. 모노레포·백엔드·DB·워커 전부 신규 구축 대상.

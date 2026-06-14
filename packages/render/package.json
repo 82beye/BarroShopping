@@ -1,0 +1,29 @@
+{
+  "name": "@shortsgen/render",
+  "version": "1.0.0",
+  "private": true,
+  "description": "바로쇼핑 쇼핑 카탈로그 쇼츠 — Remotion + inputProps (파이프라인 Stage 4 영상 합성)",
+  "scripts": {
+    "dev": "remotion studio",
+    "studio": "remotion studio",
+    "render": "remotion render ShoppingCatalog out/video.mp4",
+    "render:props": "remotion render ShoppingCatalog out/video.mp4 --props=./input-props.example.json",
+    "still": "remotion still ShoppingCatalog out/cover.png --frame=75",
+    "smoke": "bash scripts/smoke.sh",
+    "typecheck": "tsc --noEmit",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/google-fonts": "^4.0.0",
+    "@remotion/zod-types": "^4.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.5.0"
+  }
+}
