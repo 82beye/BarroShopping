@@ -105,3 +105,26 @@ def to_product(item: dict[str, Any]) -> dict[str, Any]:
     )
     prod["buy_url"] = item.get("productUrl") or item.get("shortenUrl")
     return prod
+
+
+def collect(keyword: str, limit: int = 1) -> list[dict[str, Any]]:
+    """키워드 검색 → 상품(productSchema) + 어필리에이트 deeplink(buy_url) 부착. (키 필요)
+
+    스크래핑 없이 공식 API로 수집. 원가/평점은 open API 미제공 → 운영자 확정 단계에서 보정.
+    """
+    products: list[dict[str, Any]] = []
+    for it in search_products(keyword, limit=limit):
+        prod = to_product(it)
+        url = it.get("productUrl")
+        if url:
+            try:
+                dl = to_deeplink([url])
+                if dl:
+                    prod["buy_url"] = (
+                        dl[0].get("shortenUrl") or dl[0].get("landingUrl") or url
+                    )
+            except Exception:  # noqa: BLE001 — deeplink 실패해도 원본 URL 유지
+                pass
+        prod["_source"] = "coupang-partners"
+        products.append(prod)
+    return products

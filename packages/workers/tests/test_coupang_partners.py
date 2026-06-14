@@ -44,6 +44,30 @@ def test_to_product_maps_to_schema():
     assert p["buy_url"] == "https://link.coupang.com/a/ezMnwU7tQa"
 
 
+def test_collect_attaches_deeplink(monkeypatch):
+    monkeypatch.setattr(
+        cp,
+        "search_products",
+        lambda kw, limit=1: [
+            {
+                "productName": "닥터지 선크림",
+                "categoryName": "뷰티",
+                "productPrice": 18900,
+                "productImage": "https://img/x.jpg",
+                "productUrl": "https://www.coupang.com/vp/products/1",
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        cp, "to_deeplink", lambda urls: [{"shortenUrl": "https://link.coupang.com/a/AFFIL"}]
+    )
+    out = cp.collect("닥터지 선크림")
+    assert len(out) == 1
+    assert out[0]["name"] == ["닥터지 선크림"]
+    assert out[0]["buy_url"] == "https://link.coupang.com/a/AFFIL"
+    assert out[0]["_source"] == "coupang-partners"
+
+
 def test_search_requires_keys(monkeypatch):
     monkeypatch.delenv("COUPANG_ACCESS_KEY", raising=False)
     monkeypatch.delenv("COUPANG_SECRET_KEY", raising=False)
