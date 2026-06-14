@@ -1,4 +1,4 @@
-"""워커 단계 단위 검증 — 결정적 로직만(실제 API/브라우저 없이, mock 기반)."""
+"""워커 단계 단위 검증 — 결정적 로직만(실제 API/브라우저/CLI 없이, mock 기반)."""
 from __future__ import annotations
 
 import json
@@ -8,10 +8,10 @@ import pytest
 from workers import scrape, script, voice
 
 
-# --- P2-4 script ---
+# --- P2-4 script (Claude Code 스킬) ---
 def test_build_prompt_includes_style_and_name():
     p = script.build_prompt({"name": ["무선 이어버드"]}, "감성")
-    assert "감성" in p and "무선 이어버드" in p
+    assert "감성" in p and "무선 이어버드" in p and "shorts-script" in p
 
 
 def test_parse_script_plain_and_fenced():
@@ -21,8 +21,9 @@ def test_parse_script_plain_and_fenced():
     assert script.parse_script(fenced)["hook"] == ["a", "b"]
 
 
-def test_generate_requires_key(monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+def test_generate_requires_claude_cli(monkeypatch):
+    # claude CLI 미설치 환경이면 명확히 실패 (API 키 의존 없음)
+    monkeypatch.setattr(script.shutil, "which", lambda _name: None)
     with pytest.raises(RuntimeError):
         script.generate({"name": ["x"]}, "정보형")
 
