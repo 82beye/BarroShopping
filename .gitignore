@@ -30,3 +30,10 @@ Thumbs.db
 # 대용량 상품 이미지를 LFS로 관리하지 않을 경우 주석 해제
 # public/*.png
 # public/*.jpg
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.db
