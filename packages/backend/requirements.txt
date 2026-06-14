@@ -1,0 +1,5 @@
+# 바로쇼핑 백엔드 (FastAPI) — FR-5
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+# P2-3 예정: sqlalchemy>=2.0, asyncpg (DB) · celery[redis] 또는 rq (큐) · websockets

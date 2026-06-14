@@ -1,0 +1,10 @@
+{
+  "name": "@shortsgen/frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "바로쇼핑 운영 대시보드 (FR-7) — shortsgen-dashboard.jsx 포팅 대상",
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'TODO(P3-1): Vite + React 대시보드 — src/dashboard.jsx 포팅 후 활성화'"
+  }
+}

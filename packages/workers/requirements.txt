@@ -1,0 +1,5 @@
+# 바로쇼핑 생성 파이프라인 워커 — FR-1~4
+playwright>=1.43      # FR-1 스크래퍼 (헤드리스)
+httpx>=0.27           # LLM / TTS / 발행 API 호출
+pyyaml>=6.0           # FR-2 스크립트 YAML
+# P2 예정: celery[redis] 또는 rq (비동기 큐)
