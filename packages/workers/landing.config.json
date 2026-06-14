@@ -1,0 +1,5 @@
+{
+  "base_url": "https://82beye.github.io/BarroShopping",
+  "brand": "바로쇼핑",
+  "_note": "프로필 링크 도메인. GitHub Pages·정적호스트·VPS 어디든. base_url 비우면 상대경로만 사용. env LANDING_BASE_URL/LANDING_BRAND 로 덮어쓰기 가능."
+}
