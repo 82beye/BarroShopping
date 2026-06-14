@@ -129,9 +129,13 @@ def extract_product(html: str) -> dict[str, Any]:
     merged = {**og, **ld}  # JSON-LD 우선
     source = "json-ld" if ld else ("opengraph" if og else "none")
 
+    cat = merged.get("category") or merged.get("brand") or ""
+    if isinstance(cat, str) and ">" in cat:
+        cat = cat.split(">")[-1].strip()  # 'A>B>마스크시트' → '마스크시트' (칩 간결화)
+
     raw = {
         "name": merged.get("name", ""),
-        "category": merged.get("category") or merged.get("brand") or "",
+        "category": cat,
         "sub": merged.get("sub", ""),
         "now": merged.get("now"),
         "was": merged.get("was") or merged.get("now"),

@@ -65,6 +65,16 @@ def test_rating_float_cleaned():
     assert p["rating"] == "4.1"
 
 
+def test_category_last_segment():
+    html = (
+        '<html><head><script type="application/ld+json">'
+        '{"@type":"Product","name":"X","offers":{"price":100},'
+        '"category":"화장품/미용>마스크/팩>마스크시트"}'
+        "</script></head><body></body></html>"
+    )
+    assert crawl.extract_product(html)["category"] == "마스크시트"
+
+
 def test_needs_review_when_missing():
     p = crawl.extract_product("<html><head></head><body>no data</body></html>")
     assert p["_source"] == "none"

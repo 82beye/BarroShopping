@@ -69,6 +69,8 @@ export const ProductScene: React.FC<Props> = ({
   const pulse = 1 + Math.sin((frame / fps) * 4.2) * 0.02;
 
   const dc = discount(product.was, product.now);
+  const hasDiscount = dc > 0; // 원가>판매가일 때만 스탬프·취소선 표시
+  const hasRating = Boolean(product.rating); // 평점 있을 때만 평점 행 표시
 
   // 긴 상품명/스펙이 박스를 넘지 않도록 글자 수 기준 자동 축소
   const nameSize = fitFontSize(product.name, 78, 10);
@@ -184,13 +186,15 @@ export const ProductScene: React.FC<Props> = ({
         >
           {product.sub}
         </div>
-        <div style={{ fontSize: 36, fontWeight: 700, marginTop: 16 }}>
-          <span style={{ color: "#F5A623" }}>★</span> {product.rating}
-          <span style={{ color: theme.muted, fontWeight: 600 }}>
-            {" "}
-            · 리뷰 {product.reviews}
-          </span>
-        </div>
+        {hasRating ? (
+          <div style={{ fontSize: 36, fontWeight: 700, marginTop: 16 }}>
+            <span style={{ color: "#F5A623" }}>★</span> {product.rating}
+            <span style={{ color: theme.muted, fontWeight: 600 }}>
+              {" "}
+              · 리뷰 {product.reviews}
+            </span>
+          </div>
+        ) : null}
       </div>
 
       {/* 가격 블록 */}
@@ -203,24 +207,26 @@ export const ProductScene: React.FC<Props> = ({
         }}
       >
         <div style={{ textAlign: "left" }}>
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <span
-              style={{ fontSize: 44, fontWeight: 600, color: theme.muted }}
-            >
-              {won(product.was)}
-            </span>
-            <div
-              style={{
-                position: "absolute",
-                top: "52%",
-                left: 0,
-                height: 5,
-                width: `${strike * 100}%`,
-                background: theme.muted,
-                borderRadius: 4,
-              }}
-            />
-          </div>
+          {hasDiscount ? (
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <span
+                style={{ fontSize: 44, fontWeight: 600, color: theme.muted }}
+              >
+                {won(product.was)}
+              </span>
+              <div
+                style={{
+                  position: "absolute",
+                  top: "52%",
+                  left: 0,
+                  height: 5,
+                  width: `${strike * 100}%`,
+                  background: theme.muted,
+                  borderRadius: 4,
+                }}
+              />
+            </div>
+          ) : null}
           <div
             style={{
               transform: `scale(${priceScale})`,
@@ -238,37 +244,39 @@ export const ProductScene: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* 할인 스탬프 */}
-        <div
-          style={{
-            width: 168,
-            height: 168,
-            borderRadius: "50%",
-            background: theme.accent,
-            color: "#fff",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            transform: `scale(${stampScale}) rotate(${stampRot}deg)`,
-            boxShadow: `0 18px 40px -12px ${hexToRgba(theme.accent, 0.6)}`,
-            flexShrink: 0,
-          }}
-        >
+        {/* 할인 스탬프 (할인율 0%면 숨김) */}
+        {hasDiscount ? (
           <div
             style={{
-              fontFamily: FONT_NUM,
-              fontSize: 78,
-              fontWeight: 900,
-              lineHeight: 0.9,
+              width: 168,
+              height: 168,
+              borderRadius: "50%",
+              background: theme.accent,
+              color: "#fff",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              transform: `scale(${stampScale}) rotate(${stampRot}deg)`,
+              boxShadow: `0 18px 40px -12px ${hexToRgba(theme.accent, 0.6)}`,
+              flexShrink: 0,
             }}
           >
-            {dc}%
+            <div
+              style={{
+                fontFamily: FONT_NUM,
+                fontSize: 78,
+                fontWeight: 900,
+                lineHeight: 0.9,
+              }}
+            >
+              {dc}%
+            </div>
+            <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: 4 }}>
+              OFF
+            </div>
           </div>
-          <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: 4 }}>
-            OFF
-          </div>
-        </div>
+        ) : null}
       </div>
 
       <div style={{ flex: 1 }} />
