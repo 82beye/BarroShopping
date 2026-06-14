@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from workers import compose, coupang_partners as cp, script  # noqa: E402
+from workers import compose, coupang_partners as cp, publish, script  # noqa: E402
 
 RENDER_OUT = Path(__file__).resolve().parents[2] / "render" / "out"
 
@@ -30,20 +30,6 @@ CANNED = [
         "productUrl": "https://www.coupang.com/vp/products/1473062788",
     }
 ]
-
-
-def make_publish_md(spec: dict, product: dict, affiliate: str) -> str:
-    hook = spec.get("hook") or []
-    title = hook[0] if hook else " ".join(product.get("name", ["상품"]))
-    cta = spec.get("cta") or "지금 확인하세요"
-    lines = [
-        "이 영상은 쿠팡 파트너스 활동의 일환으로 일정액의 수수료를 제공받습니다.",
-        "", title, cta,
-    ]
-    if affiliate:
-        lines += ["", f"👉 구매(쿠팡): {affiliate}"]
-    lines += ["", "#닥터지 #선크림 #SPF50 #톤업선크림 #바로쇼핑"]
-    return "\n".join(lines)
 
 
 def main() -> None:
@@ -95,7 +81,7 @@ def main() -> None:
         json.dumps(catalog, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     (RENDER_OUT / f"{args.name}-publish.md").write_text(
-        make_publish_md(spec, clean, affiliate), encoding="utf-8"
+        publish.make_description(spec, clean, affiliate), encoding="utf-8"
     )
     print(f"[4] 발행메타(deeplink={affiliate}) → out/{args.name}-publish.md")
     print(f"[done] 렌더: cd packages/render && npx remotion render ShoppingCatalog out/{args.name}.mp4 --props=out/{args.name}.props.json")
