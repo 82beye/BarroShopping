@@ -64,6 +64,13 @@ def _iter_products(obj: Any):
             yield from _iter_products(obj["@graph"])
 
 
+def _clean_rating(v: Any) -> Any:
+    """평점 부동소수(4.0799…) → 보기 좋은 1자리 문자열. 그 외는 원본 유지."""
+    if isinstance(v, (int, float)):
+        return f"{round(float(v), 1):g}"
+    return v
+
+
 def _first_image(img: Any) -> str | None:
     if isinstance(img, str):
         return img

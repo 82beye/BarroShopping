@@ -54,6 +54,17 @@ def test_jsonld_graph_array():
     assert d["name"] == "테스트상품" and d["now"] == 1000
 
 
+def test_rating_float_cleaned():
+    html = (
+        '<html><head><script type="application/ld+json">'
+        '{"@type":"Product","name":"X","offers":{"price":100},'
+        '"aggregateRating":{"ratingValue":4.0799999,"reviewCount":3}}'
+        "</script></head><body></body></html>"
+    )
+    p = crawl.extract_product(html)
+    assert p["rating"] == "4.1"
+
+
 def test_needs_review_when_missing():
     p = crawl.extract_product("<html><head></head><body>no data</body></html>")
     assert p["_source"] == "none"
