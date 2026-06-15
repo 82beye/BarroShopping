@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from . import compose, scrape, script, voice  # noqa: F401  (단계 구현)
+from . import compose, imagecut, scrape, script, voice  # noqa: F401  (단계 구현)
 
 STAGES = ("scrape", "script", "voice", "render")
 
@@ -27,6 +27,18 @@ def run_from_product(
     spec = script.generate(product, style)  # Claude Code 스킬 (claude -p)
     catalog = compose.compose_catalog([product], spec, brand=brand)
     return {"script": spec, "catalog": catalog}
+
+
+def run_reel_from_product(
+    product: dict[str, Any], style: str = "정보형", brand: str = "바로쇼핑"
+) -> dict[str, Any]:
+    """통이미지(product['image']) 1장 → 스크립트 → ProductReel inputProps (이미지컷 쇼츠).
+
+    상품 카드 카탈로그(run_from_product) 대신, 통이미지를 N개 컷으로 훑는 10~15초 쇼츠를 만든다.
+    """
+    spec = script.generate(product, style)  # Claude Code 스킬 (claude -p)
+    reel = imagecut.compose_reel(product, spec, brand=brand)
+    return {"script": spec, "reel": reel}
 
 
 def run(url: str, selectors: dict[str, str], style: str = "정보형") -> dict[str, Any]:

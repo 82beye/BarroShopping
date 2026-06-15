@@ -1,8 +1,14 @@
 import React from "react";
 import { Composition, type CalculateMetadataFunction } from "remotion";
 import { ShoppingCatalog } from "./ShoppingCatalog";
-import { catalogSchema, type CatalogProps } from "./schema";
-import { defaultCatalogProps } from "./default-props";
+import { ProductReel } from "./ProductReel";
+import {
+  catalogSchema,
+  reelSchema,
+  type CatalogProps,
+  type ReelProps,
+} from "./schema";
+import { defaultCatalogProps, defaultReelProps } from "./default-props";
 
 const WIDTH = 1080;
 const HEIGHT = 1920;
@@ -20,19 +26,43 @@ const calculateCatalogMetadata: CalculateMetadataFunction<CatalogProps> = ({
   return { durationInFrames, fps };
 };
 
+/**
+ * 컷 개수에 따라 길이를 자동 계산한다 (통이미지 이미지컷 쇼츠).
+ * durationInFrames = 컷수 × 컷당길이 (4~6컷 × 75f ≈ 10~15초)
+ */
+const calculateReelMetadata: CalculateMetadataFunction<ReelProps> = ({
+  props,
+}) => {
+  const { cuts, perCutDuration, fps } = props;
+  return { durationInFrames: cuts.length * perCutDuration, fps };
+};
+
 export const RemotionRoot: React.FC = () => {
   return (
-    <Composition
-      id="ShoppingCatalog"
-      component={ShoppingCatalog}
-      schema={catalogSchema}
-      defaultProps={defaultCatalogProps}
-      calculateMetadata={calculateCatalogMetadata}
-      width={WIDTH}
-      height={HEIGHT}
-      fps={30}
-      // durationInFrames는 calculateMetadata가 덮어쓰므로 임의값(placeholder)
-      durationInFrames={420}
-    />
+    <>
+      <Composition
+        id="ShoppingCatalog"
+        component={ShoppingCatalog}
+        schema={catalogSchema}
+        defaultProps={defaultCatalogProps}
+        calculateMetadata={calculateCatalogMetadata}
+        width={WIDTH}
+        height={HEIGHT}
+        fps={30}
+        // durationInFrames는 calculateMetadata가 덮어쓰므로 임의값(placeholder)
+        durationInFrames={420}
+      />
+      <Composition
+        id="ProductReel"
+        component={ProductReel}
+        schema={reelSchema}
+        defaultProps={defaultReelProps}
+        calculateMetadata={calculateReelMetadata}
+        width={WIDTH}
+        height={HEIGHT}
+        fps={30}
+        durationInFrames={375}
+      />
+    </>
   );
 };

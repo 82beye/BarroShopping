@@ -41,9 +41,9 @@ export const useFade = (durationInFrames: number, inF = 8, outF = 10) => {
   return Math.min(fadeIn, fadeOut);
 };
 
-/** image가 URL이면 그대로, 아니면 public/ staticFile 경로로 변환 */
+/** image가 URL(http/https)·data URI면 그대로, 아니면 public/ staticFile 경로로 변환 */
 export const resolveSrc = (image: string, staticFile: (p: string) => string) =>
-  /^https?:\/\//.test(image) ? image : staticFile(image);
+  /^(https?:\/\/|data:)/.test(image) ? image : staticFile(image);
 
 /**
  * 긴 텍스트가 박스를 넘지 않도록 가장 긴 줄의 글자 수 기준으로 폰트 크기를 자동 축소.

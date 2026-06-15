@@ -1,4 +1,12 @@
-import type { CatalogProps } from "./schema";
+import type { CatalogProps, ReelProps } from "./schema";
+
+const WARM_THEME = {
+  accent: "#FF4D2E",
+  ink: "#1A1714",
+  muted: "#8C8377",
+  stageFrom: "#FBF7F0",
+  stageTo: "#EFE6D7",
+} as const;
 
 /**
  * defaultProps = 렌더에 inputProps를 안 넘겼을 때의 폴백.
@@ -67,4 +75,26 @@ export const defaultCatalogProps: CatalogProps = {
       tintDeep: "#E0742A",
     },
   ],
+};
+
+/**
+ * ProductReel(통이미지 이미지컷 쇼츠) 기본 props.
+ * image는 Studio 미리보기용 샘플(세로로 긴 이미지). 운영에서는 --props로 실제 통이미지 주입.
+ */
+export const defaultReelProps: ReelProps = {
+  brandName: "바로쇼핑",
+  eyebrow: "BARRO SHOPPING",
+  image: "https://picsum.photos/seed/barroshopping/1080/2600",
+  hookTitle: ["이 상품", "왜 난리일까?"],
+  hookSub: "30초만 보고 결정하세요",
+  cta: "프로필 링크에서 구매 ↗",
+  cuts: [
+    { caption: "첫인상부터 다른 디자인", x: 0.5, y: 0.12, zoom: 1.12, pan: "down" },
+    { caption: "디테일이 살아있어요", x: 0.5, y: 0.37, zoom: 1.08, pan: "up" },
+    { caption: "핵심 스펙 한눈에", x: 0.5, y: 0.62, zoom: 1.12, pan: "down" },
+    { caption: "지금이 가장 좋은 가격", x: 0.5, y: 0.86, zoom: 1.1, pan: "up" },
+  ],
+  fps: 30,
+  perCutDuration: 75,
+  theme: { ...WARM_THEME },
 };
