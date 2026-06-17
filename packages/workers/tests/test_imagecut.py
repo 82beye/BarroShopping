@@ -88,6 +88,38 @@ def test_compose_reel_requires_image():
         imagecut.compose_reel(no_img, _SCRIPT)
 
 
+def test_compose_reel_multi_per_cut_image_and_duration():
+    analysis = {
+        "hook": ["올해 우수상", "받은 선풍기"],
+        "cta": "스마트스토어에서 확인",
+        "cuts": [
+            {"image": 1, "role": "hook", "y": 0.05, "zoom": 1.2, "caption": "우수상"},
+            {"image": 2, "role": "feature", "y": 0.3, "zoom": 1.1, "caption": "3가지 바람"},
+            {"image": 3, "role": "spec", "y": 0.1, "zoom": 1.1, "caption": "7.5h 타이머"},
+        ],
+    }
+    reel = imagecut.compose_reel_multi(["a.jpg", "b.jpg", "c.jpg"], analysis, target_seconds=9.0)
+    # 컷마다 지정된 이미지가 1:1 매핑
+    assert [c["image"] for c in reel["cuts"]] == ["a.jpg", "b.jpg", "c.jpg"]
+    assert reel["hookTitle"] == ["올해 우수상", "받은 선풍기"]
+    assert reel["cta"] == "스마트스토어에서 확인"
+    assert reel["image"] == "a.jpg"  # 폴백/배경 기본값 = 첫 이미지
+    total = len(reel["cuts"]) * reel["perCutDuration"] / reel["fps"]
+    assert 8.0 <= total <= 10.0  # 목표 길이 근사
+
+
+def test_compose_reel_multi_clamps_bad_image_index():
+    reel = imagecut.compose_reel_multi(
+        ["only.jpg"], {"cuts": [{"image": 5, "y": 0.5, "caption": "x"}]}
+    )
+    assert reel["cuts"][0]["image"] == "only.jpg"  # 범위 밖 인덱스는 클램프
+
+
+def test_compose_reel_multi_requires_cuts():
+    with pytest.raises(ValueError):
+        imagecut.compose_reel_multi(["a.jpg"], {"cuts": []})
+
+
 def test_compose_reel_fallback_captions_without_script():
     reel = imagecut.compose_reel(_PROD, None)
     caps = [c["caption"] for c in reel["cuts"] if c["caption"]]

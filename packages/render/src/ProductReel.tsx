@@ -71,7 +71,7 @@ export const ProductReel: React.FC<ReelProps> = (props) => {
       {timeline.map((s) => (
         <Sequence key={s.index} from={s.from} durationInFrames={s.duration}>
           <ReelScene
-            image={image}
+            image={cuts[s.index].image ?? image}
             cut={cuts[s.index]}
             durationInFrames={s.duration}
             theme={theme}

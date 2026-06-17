@@ -83,6 +83,85 @@ def plan_cuts(
     return cuts
 
 
+def build_multi_prompt(image_paths: list[str], lo: int = 5, hi: int = 7) -> str:
+    """여러 상세 이미지 → 9:16 쇼츠 통합 스토리보드(JSON)를 요청하는 claude -p 프롬프트."""
+    listing = "\n".join(f"{i + 1}. {p}" for i, p in enumerate(image_paths))
+    return (
+        "다음은 한 상품의 여러 상세 이미지다. 각 이미지를 직접 보고(Read), "
+        "9:16 세로 유튜브 쇼핑 쇼츠용 통합 컷 플랜을 만들어라. 설명/코드펜스 없이 JSON만 출력.\n"
+        '형식: {"hook":["1줄","2줄"],"cta":"문구",'
+        '"cuts":[{"image":1,"role":"hook|product|feature|detail|spec|color|price|cta",'
+        '"y":0.0,"zoom":1.1,"caption":"한국어 16자 이내"}]}\n'
+        f"- cuts는 {lo}~{hi}개. 쇼핑 쇼츠 흐름(후킹→제품→핵심특징→디테일→색상→가격/CTA) 순서로.\n"
+        "- image: 아래 목록의 1-based 번호(그 컷에 쓸 이미지).\n"
+        "- y: 그 이미지에서 9:16로 잡을 세로 포커스 중심(0=맨위, 1=맨아래). 이미지에서 그 소재가 실제 보이는 위치.\n"
+        "- zoom: 1.0(넓게)~1.4(타이트).\n"
+        "- caption: 이미지에서 보이는 사실 기반. 과장·미검증 효능/수치 금지. hook 각 줄 12자·cta 18자 이내.\n"
+        "이미지 목록:\n" + listing
+    )
+
+
+def analyze_multi(
+    image_paths: list[str], lo: int = 5, hi: int = 7, timeout: int = 300
+) -> dict[str, Any]:
+    """여러 이미지 → claude -p 비전 1회 호출로 통합 스토리보드(hook/cta/cuts) JSON 반환."""
+    from . import script  # 지연 import (claude CLI 의존)
+
+    prompt = build_multi_prompt(image_paths, lo, hi)
+    return script.parse_script(script._call_claude_code(prompt, timeout=timeout))
+
+
+def compose_reel_multi(
+    cut_images: list[str],
+    analysis: dict[str, Any],
+    brand: str = "바로쇼핑",
+    theme: dict[str, str] | None = None,
+    target_seconds: float = 15.0,
+    fps: int = 30,
+) -> dict[str, Any]:
+    """analyze_multi 결과(+렌더용 이미지 src 목록) → ProductReel reel props(컷별 image 포함).
+
+    cut_images: 1-based 인덱스에 대응하는 렌더용 이미지 경로/파일명 목록(원본과 같은 순서).
+    """
+    cuts_in = analysis.get("cuts") or []
+    if not cuts_in:
+        raise ValueError("분석 결과에 cuts가 없음 — 비전 분석 실패")
+    if not cut_images:
+        raise ValueError("렌더용 이미지 목록(cut_images)이 비어있음")
+
+    n = len(cuts_in)
+    # 컷당 길이를 목표 길이에 맞춰 균등(1.5~3.0초로 클램프) → 총 ≈ target_seconds
+    per_cut = max(45, min(90, round(target_seconds * fps / max(1, n))))
+    out_cuts: list[dict[str, Any]] = []
+    for i, c in enumerate(cuts_in):
+        idx = max(0, min(len(cut_images) - 1, int(c.get("image", 1)) - 1))
+        y = float(c.get("y", 0.5))
+        zoom = float(c.get("zoom", 1.1))
+        out_cuts.append(
+            {
+                "image": cut_images[idx],
+                "caption": str(c.get("caption", ""))[:18],
+                "x": 0.5,
+                "y": max(0.0, min(1.0, y)),
+                "zoom": max(1.0, min(2.0, zoom)),
+                "pan": "down" if i % 2 == 0 else "up",
+            }
+        )
+    hook = _two(analysis.get("hook"), ["이 상품", "왜 난리일까?"])
+    return {
+        "brandName": brand,
+        "eyebrow": "BARRO SHOPPING",
+        "image": cut_images[0],  # 폴백/블러 배경 기본값
+        "hookTitle": hook,
+        "hookSub": "",
+        "cta": analysis.get("cta") or "프로필 링크에서 구매 ↗",
+        "cuts": out_cuts,
+        "fps": fps,
+        "perCutDuration": per_cut,
+        "theme": theme or dict(compose.WARM_THEME),
+    }
+
+
 def compose_reel(
     product: dict[str, Any],
     script: dict[str, Any] | None = None,

@@ -71,6 +71,8 @@ export type CatalogProps = z.infer<typeof catalogSchema>;
  * 픽셀이 아닌 비율이라 원본 해상도와 무관(이미지 라이브러리 불필요).
  */
 export const cutSchema = z.object({
+  /** (멀티이미지) 이 컷이 쓸 이미지 — http(s) URL·public 파일명·data URI. 없으면 reel.image 사용 */
+  image: z.string().optional(),
   /** 화면 자막 (≤16자 권장). 빈 문자열이면 자막 숨김 */
   caption: z.string().default(""),
   /** 가로 중심 0~1 (기본 0.5 = 중앙) */
