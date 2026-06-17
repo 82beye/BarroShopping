@@ -64,12 +64,15 @@ def product_page_html(
     dc = _discount(was, now)
     hook = (spec.get("hook") or [name])[0]
     cta = spec.get("cta") or "지금 구매하기"
-    price_html = (
-        f'<span class="was">{_esc(_won(was))}</span> '
-        f'<b class="now">{_esc(_won(now))}</b> <span class="off">{dc}% OFF</span>'
-        if dc > 0
-        else f'<b class="now">{_esc(_won(now))}</b>'
-    )
+    if dc > 0:
+        price_html = (
+            f'<span class="was">{_esc(_won(was))}</span> '
+            f'<b class="now">{_esc(_won(now))}</b> <span class="off">{dc}% OFF</span>'
+        )
+    elif now > 0:
+        price_html = f'<b class="now">{_esc(_won(now))}</b>'
+    else:
+        price_html = ""  # 가격 미상(now=0) → 가격 줄 숨김 (₩0 표시 방지)
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{_esc(name)} · {_esc(cfg['brand'])}</title>
@@ -91,7 +94,7 @@ def product_page_html(
 <video class="cover" autoplay loop muted playsinline preload="auto" poster="cover.png"><source src="video.mp4" type="video/mp4"></video>
 <div class="hook">{_esc(hook)}</div>
 <div class="name">{_esc(name)}</div>
-<div class="price">{price_html}</div>
+{f'<div class="price">{price_html}</div>' if price_html else ''}
 <a class="buy" href="{_esc(_safe_url(affiliate))}" target="_blank" rel="nofollow sponsored noopener">{_esc(cta)}</a>
 <div class="disc">이 페이지는 제휴(어필리에이트) 활동의 일환으로 일정액의 수수료를 제공받습니다.</div>
 <a class="back" href="../../index.html">← {_esc(cfg['brand'])} 전체 상품</a>
