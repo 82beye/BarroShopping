@@ -98,14 +98,32 @@ def product_page_html(
 </div></body></html>"""
 
 
+def _profile_card(it: dict[str, Any]) -> str:
+    """프로필 리스트 카드. 이미지=쇼핑몰(어필리에이트) 직행 / 제목=상세(영상) 페이지.
+
+    어필리에이트가 없거나 http(s)가 아니면 이미지도 상세 페이지로 폴백(죽은 # 링크 방지).
+    """
+    page = _esc(it["page"]) + "index.html"
+    aff = str(it.get("affiliate") or "").strip()
+    is_aff = aff.lower().startswith(("https://", "http://"))
+    thumb_href = _esc(aff) if is_aff else page
+    # 어필리에이트(외부 쇼핑몰)면 새 탭 + 검색엔진 광고표기(rel)
+    thumb_attrs = ' target="_blank" rel="nofollow sponsored noopener"' if is_aff else ""
+    return (
+        f'<div class="card">'
+        f'<a class="thumb" href="{thumb_href}"{thumb_attrs}>'
+        f'<img src="{_esc(it["cover"])}" alt="" loading="lazy" '
+        f'onerror="this.style.visibility=\'hidden\'"></a>'
+        f'<a class="info" href="{page}"><span>{_esc(it["title"])}</span></a>'
+        f'</div>'
+    )
+
+
 def profile_html(manifest: list[dict[str, Any]], cfg: dict[str, str]) -> str:
     brand = cfg["brand"]
-    cards = "\n".join(
-        f'<a class="card" href="{_esc(it["page"])}index.html">'
-        f'<img src="{_esc(it["cover"])}" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">'
-        f'<span>{_esc(it["title"])}</span></a>'
-        for it in manifest
-    ) or '<p class="empty">아직 등록된 상품이 없습니다.</p>'
+    cards = "\n".join(_profile_card(it) for it in manifest) or (
+        '<p class="empty">아직 등록된 상품이 없습니다.</p>'
+    )
     return f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{_esc(brand)} · 전체 상품</title>
@@ -117,16 +135,22 @@ def profile_html(manifest: list[dict[str, Any]], cfg: dict[str, str]) -> str:
 .head{{font-size:24px;font-weight:900}}.head .dot{{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--ac);margin-right:8px}}
 .sub{{color:var(--mut);font-size:14px;margin:6px 0 20px}}
 .list{{display:flex;flex-direction:column;gap:12px}}
-.card{{display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;background:#fff;border:1px solid #eadfce;border-radius:14px;padding:12px}}
-.card img{{width:64px;height:64px;border-radius:12px;object-fit:cover;background:#eee}}
-.card span{{font-weight:700;font-size:15px;line-height:1.35}}
+.card{{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid #eadfce;border-radius:14px;padding:12px}}
+.card .thumb{{flex-shrink:0;display:block;line-height:0;position:relative}}
+.card .thumb::after{{content:"구매 ↗";position:absolute;right:-4px;bottom:-4px;background:var(--ac);color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:8px}}
+.card img{{width:64px;height:64px;border-radius:12px;object-fit:cover;background:#eee;display:block}}
+.card .info{{text-decoration:none;color:inherit;flex:1}}
+.card .info span{{font-weight:700;font-size:15px;line-height:1.35}}
 .empty{{color:var(--mut)}}
+.disc{{margin-top:18px;font-size:11px;color:var(--mut);line-height:1.5}}
 </style></head><body><div class="wrap">
 <div class="head"><span class="dot"></span>{_esc(brand)}</div>
-<div class="sub">추천 상품 모음 · 탭하면 상품 페이지로</div>
+<div class="sub">이미지를 누르면 바로 구매 · 제목은 상세 영상</div>
 <div class="list">
 {cards}
-</div></div></body></html>"""
+</div>
+<div class="disc">※ 위 링크는 제휴(어필리에이트) 활동의 일환으로 일정액의 수수료를 제공받습니다.</div>
+</div></body></html>"""
 
 
 def write_product_page(

@@ -41,5 +41,41 @@ def test_profile_lists_products_product_path():
     assert "비2" in h and "에이1" in h
 
 
+def test_profile_image_links_to_mall_when_affiliate():
+    manifest = [
+        {
+            "id": "1",
+            "title": "메디힐",
+            "cover": "Product/1/cover.png",
+            "page": "Product/1/",
+            "affiliate": "https://naver.me/5Z19FzfA",
+        }
+    ]
+    h = landing.profile_html(manifest, CFG)
+    # 이미지(thumb)는 쇼핑몰(어필리에이트)로 직행 + 광고표기 rel
+    assert 'class="thumb" href="https://naver.me/5Z19FzfA"' in h
+    assert 'rel="nofollow sponsored noopener"' in h
+    # 제목(info)은 상세(영상) 페이지 유지
+    assert 'class="info" href="Product/1/index.html"' in h
+    # 공정위 고지
+    assert "수수료를 제공받습니다" in h
+
+
+def test_profile_image_falls_back_to_detail_without_affiliate():
+    manifest = [{"id": "1", "title": "상품", "cover": "c.png", "page": "Product/1/"}]
+    h = landing.profile_html(manifest, CFG)
+    # 어필리에이트 없으면 이미지도 상세로 폴백(죽은 # 링크 금지)
+    assert 'href="#"' not in h
+    assert h.count("Product/1/index.html") >= 2  # thumb + info 둘 다
+
+
+def test_profile_image_rejects_non_http_affiliate():
+    manifest = [
+        {"id": "1", "title": "x", "cover": "c.png", "page": "Product/1/", "affiliate": "javascript:alert(1)"}
+    ]
+    h = landing.profile_html(manifest, CFG)
+    assert "javascript:alert" not in h  # http(s) 아니면 폴백
+
+
 def test_profile_empty():
     assert "아직 등록된 상품이 없습니다" in landing.profile_html([], CFG)
