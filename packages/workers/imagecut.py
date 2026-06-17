@@ -83,6 +83,56 @@ def plan_cuts(
     return cuts
 
 
+def build_cover_prompt(image_paths: list[str]) -> str:
+    """여러 이미지 중 '표지(커버/썸네일)로 가장 좋은 1컷'을 고르는 claude -p 비전 프롬프트.
+
+    상품 유형 휴리스틱: 전자/가전=제품 단독샷, 의류/침구/홈텍스타일=모델 사용 라이프스타일.
+    """
+    listing = "\n".join(f"{i + 1}. {p}" for i, p in enumerate(image_paths))
+    return (
+        "다음은 한 상품의 여러 이미지다. 각 이미지를 직접 보고(Read), 유튜브 쇼핑 쇼츠/썸네일 "
+        "표지로 쓸 '가장 좋은 1컷'을 골라라. 설명/코드펜스 없이 JSON만 출력.\n"
+        '형식: {"image":1,"y":0.4,"zoom":1.05,"reason":"한 줄 근거"}\n'
+        "선정 규칙:\n"
+        "- 전자제품/가전: 제품이 또렷하고 크게 보이는 깨끗한 제품 단독샷(텍스트·잡소재 적은 것).\n"
+        "- 의류/침구/홈텍스타일/뷰티: 모델이 제품을 실제 사용하는 감성 라이프스타일 컷.\n"
+        "- 반드시 피할 것: 스펙 표, 수상 인증서, 텍스트 배너, 쿠폰/이벤트, 로고만 있는 컷, 여백.\n"
+        "- image: 아래 목록의 1-based 번호. y: 그 이미지에서 9:16로 잡을 세로 포커스 중심(0~1, 피사체가 화면 중앙에 오도록). zoom: 1.0~1.3.\n"
+        "이미지 목록:\n" + listing
+    )
+
+
+def pick_cover(image_paths: list[str], timeout: int = 180) -> dict[str, Any]:
+    """여러 이미지 중 표지로 가장 좋은 1컷을 claude -p 비전으로 선택 → {image,y,zoom,reason}."""
+    from . import script  # 지연 import
+
+    return script.parse_script(script._call_claude_code(build_cover_prompt(image_paths), timeout=timeout))
+
+
+def cover_props(reel: dict[str, Any], image: str, y: float, zoom: float = 1.05) -> dict[str, Any]:
+    """선택된 커버 이미지/영역으로 1컷 커버 still용 props 생성.
+
+    훅/자막/진행바를 모두 숨겨(hideHook·hideNav) '깨끗한 상품 이미지'를 표지로 만든다.
+    reel 의 브랜드·테마는 그대로 상속.
+    """
+    return {
+        **reel,
+        "image": image,
+        "cuts": [
+            {
+                "image": image,
+                "caption": "",
+                "x": 0.5,
+                "y": max(0.0, min(1.0, float(y))),
+                "zoom": max(1.0, min(2.0, float(zoom))),
+                "pan": "down",
+            }
+        ],
+        "hideNav": True,
+        "hideHook": True,
+    }
+
+
 def build_multi_prompt(image_paths: list[str], lo: int = 5, hi: int = 7) -> str:
     """여러 상세 이미지 → 9:16 쇼츠 통합 스토리보드(JSON)를 요청하는 claude -p 프롬프트."""
     listing = "\n".join(f"{i + 1}. {p}" for i, p in enumerate(image_paths))

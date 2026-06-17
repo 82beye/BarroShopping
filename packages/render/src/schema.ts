@@ -114,6 +114,8 @@ export const reelSchema = z.object({
   bgmVolume: z.number().min(0).max(1).optional(),
   /** (선택) 하단 진행 네비 숨김 — 커버(still) 생성 시 true */
   hideNav: z.boolean().optional(),
+  /** (선택) 첫 컷 훅 오버레이 숨김 — 깨끗한 커버 이미지 생성 시 true */
+  hideHook: z.boolean().optional(),
 
   theme: themeSchema,
 });

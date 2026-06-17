@@ -41,6 +41,7 @@ export const ProductReel: React.FC<ReelProps> = (props) => {
     bgm,
     bgmVolume,
     hideNav,
+    hideHook,
     theme,
   } = props;
 
@@ -126,21 +127,25 @@ export const ProductReel: React.FC<ReelProps> = (props) => {
         </span>
       </div>
 
-      {/* 첫 컷 훅 오버레이 (등장 후 페이드아웃) */}
-      <Sequence from={0} durationInFrames={perCutDuration}>
-        <HookOverlay
-          title={hookTitle}
-          sub={hookSub}
-          titleSize={titleSize}
-          perCutDuration={perCutDuration}
-          theme={theme}
-        />
-      </Sequence>
+      {/* 첫 컷 훅 오버레이 (등장 후 페이드아웃) — 커버 생성 시 숨김 */}
+      {!hideHook && (
+        <Sequence from={0} durationInFrames={perCutDuration}>
+          <HookOverlay
+            title={hookTitle}
+            sub={hookSub}
+            titleSize={titleSize}
+            perCutDuration={perCutDuration}
+            theme={theme}
+          />
+        </Sequence>
+      )}
 
-      {/* 마지막 컷 CTA 오버레이 */}
-      <Sequence from={ctaStart} durationInFrames={perCutDuration}>
-        <CtaOverlay cta={cta} ctaSize={ctaSize} theme={theme} />
-      </Sequence>
+      {/* 마지막 컷 CTA 오버레이 — 커버(hideHook) 생성 시 함께 숨김 */}
+      {!hideHook && (
+        <Sequence from={ctaStart} durationInFrames={perCutDuration}>
+          <CtaOverlay cta={cta} ctaSize={ctaSize} theme={theme} />
+        </Sequence>
+      )}
 
       {/* 하단 진행 네비 */}
       {!hideNav && (

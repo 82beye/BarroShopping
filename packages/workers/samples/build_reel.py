@@ -89,8 +89,9 @@ def main() -> None:
     if not product.get("image"):
         sys.exit("통이미지가 없습니다 — --image 또는 og:image가 있는 --html 필요")
 
-    # 통이미지 경로 정규화(로컬 파일 → public 복사). 스크립트에는 원본 메타만 전달
-    product["image"] = _prepare_image(str(product["image"]), args.id)
+    # 통이미지 경로 정규화(로컬 파일 → public 복사). 원본 경로는 커버 비전 선별용으로 보존
+    orig_image = str(product["image"])
+    product["image"] = _prepare_image(orig_image, args.id)
     clean = {k: v for k, v in product.items() if not str(k).startswith("_")}
 
     # 2) 스크립트 (Claude Code) — 컷 자막의 원천
@@ -123,13 +124,18 @@ def main() -> None:
             ["npx", "remotion", "render", "ProductReel", str(vid_rel), f"--props={reel_props}"],
             cwd=str(RENDER_PKG), check=True,
         )
+        # 커버: 통이미지에서 표지에 가장 좋은 영역(제품샷/모델 라이프스타일)을 비전으로 선별
+        try:
+            pc = imagecut.pick_cover([orig_image])
+            print(f"    커버 선정: y={pc.get('y')} · {pc.get('reason', '')}")
+            cov = imagecut.cover_props(reel, reel["image"], pc.get("y", 0.4), pc.get("zoom", 1.05))
+        except Exception as exc:  # noqa: BLE001
+            print(f"    (커버 선정 폴백: {exc})")
+            cov = {**reel, "hideNav": True, "hideHook": True}
         cover_props = P["dir"] / "reel.cover.props.json"
-        cover_props.write_text(
-            json.dumps({**reel, "hideNav": True}, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        cover_props.write_text(json.dumps(cov, ensure_ascii=False, indent=2), encoding="utf-8")
         subprocess.run(
-            ["npx", "remotion", "still", "ProductReel", str(cov_rel), "--frame=20", f"--props={cover_props}"],
+            ["npx", "remotion", "still", "ProductReel", str(cov_rel), "--frame=30", f"--props={cover_props}"],
             cwd=str(RENDER_PKG), check=True,
         )
 
