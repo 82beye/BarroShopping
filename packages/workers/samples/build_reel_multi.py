@@ -41,6 +41,20 @@ def _to_public(path: str, pid: str, i: int) -> str:
     return dst.name
 
 
+def _bgm_to_public(path: str, pid: str) -> str:
+    """배경음악 파일을 render/public/ 으로 복사(원격 URL은 그대로)."""
+    if path.startswith(("http://", "https://", "data:")):
+        return path
+    src = Path(path).expanduser().resolve()
+    if not src.exists():
+        sys.exit(f"BGM 파일을 찾을 수 없음: {src}")
+    public = RENDER_PKG / "public"
+    public.mkdir(parents=True, exist_ok=True)
+    dst = public / f"{assets.safe_id(pid)}-bgm{src.suffix.lower()}"
+    shutil.copyfile(src, dst)
+    return dst.name
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--id", required=True)
@@ -48,6 +62,8 @@ def main() -> None:
     ap.add_argument("--title", default="")
     ap.add_argument("--affiliate", default="")
     ap.add_argument("--target-seconds", type=float, default=15.0)
+    ap.add_argument("--bgm", default="", help="배경음악 파일 경로 또는 URL (mp3/m4a/wav)")
+    ap.add_argument("--bgm-volume", type=float, default=0.4, help="BGM 볼륨 0~1 (기본 0.4)")
     ap.add_argument("--render", action="store_true", help="Remotion 렌더까지 수행")
     args = ap.parse_args()
 
@@ -70,8 +86,15 @@ def main() -> None:
     print("[2] 이미지 → render/public 복사")
     cut_images = [_to_public(p, args.id, i) for i, p in enumerate(args.images)]
 
+    bgm = _bgm_to_public(args.bgm, args.id) if args.bgm else None
+    if bgm:
+        print(f"    BGM: {bgm} (volume {args.bgm_volume})")
+
     print(f"[3] compose_reel_multi → out/Product/{args.id}/reel.props.json")
-    reel = imagecut.compose_reel_multi(cut_images, analysis, target_seconds=args.target_seconds)
+    reel = imagecut.compose_reel_multi(
+        cut_images, analysis, target_seconds=args.target_seconds,
+        bgm=bgm, bgm_volume=args.bgm_volume,
+    )
     P = assets.paths(args.id)
     reel_props = P["dir"] / "reel.props.json"
     reel_props.write_text(json.dumps(reel, ensure_ascii=False, indent=2), encoding="utf-8")

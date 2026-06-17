@@ -120,6 +120,22 @@ def test_compose_reel_multi_requires_cuts():
         imagecut.compose_reel_multi(["a.jpg"], {"cuts": []})
 
 
+def test_compose_reel_multi_bgm_optional():
+    analysis = {"cuts": [{"image": 1, "y": 0.5, "caption": "x"}]}
+    # bgm 지정 → bgm/bgmVolume 키 포함
+    reel = imagecut.compose_reel_multi(["a.jpg"], analysis, bgm="bgm.mp3", bgm_volume=0.3)
+    assert reel["bgm"] == "bgm.mp3" and reel["bgmVolume"] == 0.3
+    # 미지정 → 무음(키 없음)
+    assert "bgm" not in imagecut.compose_reel_multi(["a.jpg"], analysis)
+
+
+def test_compose_reel_bgm_volume_clamped():
+    reel = imagecut.compose_reel(
+        {"image": "x.jpg", "name": ["상품"]}, None, bgm="b.mp3", bgm_volume=9.0
+    )
+    assert reel["bgm"] == "b.mp3" and reel["bgmVolume"] == 1.0  # 0~1 클램프
+
+
 def test_compose_reel_fallback_captions_without_script():
     reel = imagecut.compose_reel(_PROD, None)
     caps = [c["caption"] for c in reel["cuts"] if c["caption"]]

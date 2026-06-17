@@ -161,6 +161,14 @@ def analyze_multi(
     return script.parse_script(script._call_claude_code(prompt, timeout=timeout))
 
 
+def _attach_bgm(reel: dict[str, Any], bgm: str | None, bgm_volume: float) -> dict[str, Any]:
+    """bgm(URL·public 파일명)이 있으면 reel props에 배경음악 키를 추가(없으면 무음 유지)."""
+    if bgm:
+        reel["bgm"] = bgm
+        reel["bgmVolume"] = max(0.0, min(1.0, float(bgm_volume)))
+    return reel
+
+
 def compose_reel_multi(
     cut_images: list[str],
     analysis: dict[str, Any],
@@ -168,6 +176,8 @@ def compose_reel_multi(
     theme: dict[str, str] | None = None,
     target_seconds: float = 15.0,
     fps: int = 30,
+    bgm: str | None = None,
+    bgm_volume: float = 0.4,
 ) -> dict[str, Any]:
     """analyze_multi 결과(+렌더용 이미지 src 목록) → ProductReel reel props(컷별 image 포함).
 
@@ -198,7 +208,7 @@ def compose_reel_multi(
             }
         )
     hook = _two(analysis.get("hook"), ["이 상품", "왜 난리일까?"])
-    return {
+    reel = {
         "brandName": brand,
         "eyebrow": "BARRO SHOPPING",
         "image": cut_images[0],  # 폴백/블러 배경 기본값
@@ -210,6 +220,7 @@ def compose_reel_multi(
         "perCutDuration": per_cut,
         "theme": theme or dict(compose.WARM_THEME),
     }
+    return _attach_bgm(reel, bgm, bgm_volume)
 
 
 def compose_reel(
@@ -220,6 +231,8 @@ def compose_reel(
     target_seconds: float = 12.0,
     per_cut: int = PER_CUT,
     fps: int = 30,
+    bgm: str | None = None,
+    bgm_volume: float = 0.4,
 ) -> dict[str, Any]:
     """상품(통이미지 포함) + 스크립트 → render ProductReel inputProps(reelSchema) 조립.
 
@@ -236,7 +249,7 @@ def compose_reel(
     if not captions:
         captions = _fallback_captions(product)
 
-    return {
+    reel = {
         "brandName": brand,
         "eyebrow": "BARRO SHOPPING",
         "image": image,
@@ -248,3 +261,4 @@ def compose_reel(
         "perCutDuration": per_cut,
         "theme": theme or dict(compose.WARM_THEME),
     }
+    return _attach_bgm(reel, bgm, bgm_volume)
