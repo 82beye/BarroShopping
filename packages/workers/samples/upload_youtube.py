@@ -39,26 +39,35 @@ def main() -> None:
     ap.add_argument("--id", required=True)
     ap.add_argument("--mock", action="store_true")
     ap.add_argument("--privacy", default="private")
+    ap.add_argument("--video", default="", help="업로드 영상 경로 (기본: out/Product/{id}/video.mp4)")
+    ap.add_argument("--publish", default="", help="발행메타(.md) 경로 (기본: out/Product/{id}/publish.md)")
+    ap.add_argument("--title", default="", help="제목 직접 지정 (미지정 시 publish.md에서 추출)")
     args = ap.parse_args()
 
     P = assets.paths(args.id)
-    if not P["publish"].exists():
-        print(f"발행메타 없음: {P['publish']} (먼저 build_product 실행)")
+    # 롱폼(long.mp4)·홍보(out/Promo/) 등 표준 경로 밖 산출물은 --video/--publish로 지정
+    publish_path = Path(args.publish).expanduser().resolve() if args.publish else P["publish"]
+    video_path = Path(args.video).expanduser().resolve() if args.video else P["video"]
+
+    if not publish_path.exists():
+        print(f"발행메타 없음: {publish_path} (먼저 build_* 실행 또는 --publish 지정)")
         return
-    desc = P["publish"].read_text(encoding="utf-8")
+    desc = publish_path.read_text(encoding="utf-8")
     title, tags = _title_tags(desc, fallback=f"상품 {args.id}")
+    if args.title:
+        title = args.title
     meta = yt.build_metadata(title, desc, tags, privacy=args.privacy)
 
-    print(f"[youtube] id={args.id} video={P['video']} (exists={P['video'].exists()})")
+    print(f"[youtube] id={args.id} video={video_path} (exists={video_path.exists()})")
     print("  title:", meta["snippet"]["title"])
     print("  tags :", meta["snippet"]["tags"])
     if args.mock:
         print(json.dumps(meta, ensure_ascii=False, indent=2))
         print("  (mock) 실제 업로드 생략 — 키 없이 메타만 검증. 실키 넣고 --mock 빼면 업로드.")
         return
-    if not P["video"].exists():
-        print("video.mp4 없음 — build_product --render 먼저"); return
-    vid = yt.upload(str(P["video"]), meta, yt.refresh_access_token())
+    if not video_path.exists():
+        print("영상 파일 없음 — 먼저 렌더 또는 --video 확인"); return
+    vid = yt.upload(str(video_path), meta, yt.refresh_access_token())
     print(f"  ✅ uploaded videoId={vid} (privacy={args.privacy})")
 
 

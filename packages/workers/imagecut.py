@@ -262,3 +262,170 @@ def compose_reel(
         "theme": theme or dict(compose.WARM_THEME),
     }
     return _attach_bgm(reel, bgm, bgm_volume)
+
+
+# ── 16:9 롱폼(ProductLong) — 쇼츠 퍼널의 "관련 동영상" 목적지 ────────────────────
+# 가로·25초 이상의 진짜 롱폼이라 YouTube가 쇼츠로 재분류하지 않고, 설명란 클릭 링크·
+# 카드·끝화면을 붙일 수 있어 "쇼츠 댓글/설명 링크 불가" 제약을 우회한다.
+
+LONG_DEFAULT_SECONDS = 75.0
+LONG_INTRO_SECONDS = 4.0
+LONG_OUTRO_SECONDS = 20.0  # 끝화면 안전구간(끝화면 요소가 본문을 가리지 않도록)
+
+
+def _long_timing(
+    n_cuts: int,
+    target_seconds: float,
+    fps: int,
+    intro_seconds: float,
+    outro_seconds: float,
+) -> tuple[int, int, int]:
+    """(intro, per_cut, outro) 프레임을 계산 — 총 길이가 target_seconds에 근접하도록.
+
+    컷당 4~10초로 클램프하고, 인트로/끝화면을 뺀 본문 시간을 컷 수로 균등 분배한다.
+    """
+    intro = max(60, round(intro_seconds * fps))
+    outro = max(150, round(outro_seconds * fps))  # 끝화면 표시 요건(영상 ≥25초)은 본문이 충족
+    body_seconds = max(target_seconds - intro_seconds - outro_seconds, n_cuts * 4.0)
+    per_cut = _clamp(round(body_seconds * fps / max(1, n_cuts)), 120, 300)
+    return intro, per_cut, outro
+
+
+def _long_base(
+    *,
+    brand: str,
+    eyebrow: str,
+    image: str,
+    hook: list[str],
+    hook_sub: str,
+    cta: str,
+    cuts: list[dict[str, Any]],
+    theme: dict[str, str] | None,
+    fps: int,
+    intro: int,
+    per_cut: int,
+    outro: int,
+    outro_title: list[str],
+    outro_note: str,
+) -> dict[str, Any]:
+    return {
+        "brandName": brand,
+        "eyebrow": eyebrow,
+        "image": image,
+        "hookTitle": hook,
+        "hookSub": hook_sub,
+        "cta": cta,
+        "cuts": cuts,
+        "outroTitle": outro_title,
+        "outroNote": outro_note,
+        "fps": fps,
+        "introDuration": intro,
+        "perCutDuration": per_cut,
+        "outroDuration": outro,
+        "theme": theme or dict(compose.WARM_THEME),
+    }
+
+
+def compose_long_multi(
+    cut_images: list[str],
+    analysis: dict[str, Any],
+    brand: str = "바로쇼핑",
+    theme: dict[str, str] | None = None,
+    target_seconds: float = LONG_DEFAULT_SECONDS,
+    fps: int = 30,
+    intro_seconds: float = LONG_INTRO_SECONDS,
+    outro_seconds: float = LONG_OUTRO_SECONDS,
+    bgm: str | None = None,
+    bgm_volume: float = 0.4,
+) -> dict[str, Any]:
+    """analyze_multi 결과(+렌더용 이미지 src 목록) → ProductLong(longSchema) props.
+
+    compose_reel_multi와 동일한 컷 매핑을 쓰되, 16:9 분할 레이아웃 + 인트로/끝화면을 위해
+    타이밍을 60~90초로 늘린다.
+    """
+    cuts_in = analysis.get("cuts") or []
+    if not cuts_in:
+        raise ValueError("분석 결과에 cuts가 없음 — 비전 분석 실패")
+    if not cut_images:
+        raise ValueError("렌더용 이미지 목록(cut_images)이 비어있음")
+
+    n = len(cuts_in)
+    intro, per_cut, outro = _long_timing(n, target_seconds, fps, intro_seconds, outro_seconds)
+    out_cuts: list[dict[str, Any]] = []
+    for i, c in enumerate(cuts_in):
+        idx = max(0, min(len(cut_images) - 1, int(c.get("image", 1)) - 1))
+        out_cuts.append(
+            {
+                "image": cut_images[idx],
+                "caption": str(c.get("caption", ""))[:18],
+                "x": 0.5,
+                "y": max(0.0, min(1.0, float(c.get("y", 0.5)))),
+                "zoom": max(1.0, min(2.0, float(c.get("zoom", 1.1)))),
+                "pan": "down" if i % 2 == 0 else "up",
+            }
+        )
+    reel = _long_base(
+        brand=brand,
+        eyebrow="BARRO SHOPPING",
+        image=cut_images[0],
+        hook=_two(analysis.get("hook"), ["이 상품", "제대로 뜯어봤습니다"]),
+        hook_sub=str(analysis.get("hookSub") or ""),
+        cta=analysis.get("cta") or "구매 링크는 더보기란·카드를 확인하세요",
+        cuts=out_cuts,
+        theme=theme,
+        fps=fps,
+        intro=intro,
+        per_cut=per_cut,
+        outro=outro,
+        outro_title=_two(analysis.get("outroTitle"), ["지금", "구매하세요"]),
+        outro_note=str(analysis.get("outroNote") or "구매 링크는 더보기란 · 화면의 카드/끝화면을 눌러주세요"),
+    )
+    return _attach_bgm(reel, bgm, bgm_volume)
+
+
+def long_from_reel(
+    reel: dict[str, Any],
+    target_seconds: float = LONG_DEFAULT_SECONDS,
+    intro_seconds: float = LONG_INTRO_SECONDS,
+    outro_seconds: float = LONG_OUTRO_SECONDS,
+) -> dict[str, Any]:
+    """기존 ProductReel(reelSchema) props → ProductLong(longSchema) props 변환(비전 재분석 없이).
+
+    이미 만든 9:16 쇼츠의 컷(밴드/줌/팬/이미지)을 그대로 재사용해 같은 상품의 16:9 롱폼을 만든다.
+    쇼츠와 롱폼의 스토리·자막이 일관되고, claude -p 호출 비용이 0이다.
+    """
+    cuts = reel.get("cuts") or []
+    if not cuts:
+        raise ValueError("reel에 cuts가 없음 — 롱폼 변환 불가")
+    fps = int(reel.get("fps", 30))
+    n = len(cuts)
+    intro, per_cut, outro = _long_timing(n, target_seconds, fps, intro_seconds, outro_seconds)
+    out = _long_base(
+        brand=reel.get("brandName", "바로쇼핑"),
+        eyebrow=reel.get("eyebrow", "BARRO SHOPPING"),
+        image=reel.get("image") or cuts[0].get("image"),
+        hook=_two(reel.get("hookTitle"), ["이 상품", "제대로 뜯어봤습니다"]),
+        hook_sub=str(reel.get("hookSub") or ""),
+        cta=reel.get("cta") or "구매 링크는 더보기란·카드를 확인하세요",
+        cuts=[{**c} for c in cuts],  # 동일 컷 재사용
+        theme=reel.get("theme"),
+        fps=fps,
+        intro=intro,
+        per_cut=per_cut,
+        outro=outro,
+        outro_title=["지금", "구매하세요"],
+        outro_note="구매 링크는 더보기란 · 화면의 카드/끝화면을 눌러주세요",
+    )
+    bgm = reel.get("bgm")
+    return _attach_bgm(out, bgm, float(reel.get("bgmVolume", 0.4))) if bgm else out
+
+
+def long_cover_props(long_reel: dict[str, Any], image: str | None = None) -> dict[str, Any]:
+    """16:9 롱폼 커버(썸네일) still용 props — 인트로 히어로의 훅 텍스트를 숨겨 깨끗한 이미지로.
+
+    image를 주면 그 이미지를 히어로로(비전이 고른 베스트 컷), 없으면 reel.image 사용.
+    """
+    out = {**long_reel, "hideHook": True}
+    if image:
+        out["image"] = image
+    return out

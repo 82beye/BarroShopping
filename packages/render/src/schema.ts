@@ -121,3 +121,105 @@ export const reelSchema = z.object({
 });
 
 export type ReelProps = z.infer<typeof reelSchema>;
+
+/**
+ * ProductLong inputProps — 16:9 가로 롱폼(쇼츠 퍼널의 "관련 동영상" 목적지).
+ *
+ * 구성: 인트로(히어로 + 훅) → 본문 컷(좌 이미지 · 우 정보 분할) → 끝화면 세이프존(마지막 ~20초).
+ * 가로(16:9) · 25초 이상의 "진짜 롱폼"이라 YouTube가 쇼츠로 재분류하지 않으며,
+ * 설명란 클릭 링크 · 카드 · 끝화면을 붙일 수 있어 쇼츠의 링크 제약을 우회한다.
+ * 길이 = introDuration + cuts.length × perCutDuration + outroDuration (calculateMetadata에서 자동 합산).
+ */
+export const longSchema = z.object({
+  brandName: z.string(),
+  eyebrow: z.string().default("BARRO SHOPPING"),
+  /** 폴백/블러 배경 + 인트로 히어로 기본 이미지 */
+  image: z.string(),
+  /** 인트로 히어로에 오버레이되는 훅 (2줄) */
+  hookTitle: z.tuple([z.string(), z.string()]),
+  hookSub: z.string().default(""),
+  /** 본문 하단 띠 CTA */
+  cta: z.string(),
+  /** 이미지 컷들 (각 컷이 하나의 씬, 좌측 이미지 패널에 표시) */
+  cuts: z.array(cutSchema).min(2),
+
+  /** 끝화면(아웃트로) 카피 — 클릭 가능한 카드/끝화면/설명란으로 유도 */
+  outroTitle: z.tuple([z.string(), z.string()]).default(["지금", "구매하세요"]),
+  outroNote: z
+    .string()
+    .default("구매 링크는 더보기란 · 화면의 카드/끝화면을 눌러주세요"),
+  /** 끝화면 요소(구독·관련영상) 배치 가이드(점선 박스) 표시 — 기획용, 최종 렌더는 false */
+  endcardGuides: z.boolean().optional(),
+
+  /** 타이밍 (프레임). 길이는 calculateMetadata에서 자동 합산 */
+  fps: z.number().int().positive().default(30),
+  introDuration: z.number().int().positive().default(120),
+  perCutDuration: z.number().int().positive().default(195),
+  /** 끝화면 안전구간 — 마지막 ~20초(끝화면 요소가 본문을 가리지 않도록 비워둠) */
+  outroDuration: z.number().int().positive().default(600),
+
+  /** (선택) 배경음악 */
+  bgm: z.string().optional(),
+  bgmVolume: z.number().min(0).max(1).optional(),
+  /** (선택) 인트로 훅 텍스트 숨김 — 깨끗한 16:9 커버(still) 생성 시 true */
+  hideHook: z.boolean().optional(),
+
+  theme: themeSchema,
+});
+
+export type LongProps = z.infer<typeof longSchema>;
+
+/** 홍보 영상에 노출할 제휴 쇼핑몰 — 실제 로고(흰 카드) 또는 텍스트 워드마크 */
+export const promoMallSchema = z.object({
+  /** 로고 이미지(public 파일명·URL). 있으면 흰 카드 안에 표시 */
+  logo: z.string().optional(),
+  /** 로고가 없을 때 표시할 텍스트 워드마크 */
+  label: z.string().optional(),
+  /** 텍스트 워드마크 색(브랜드 컬러). 미지정 시 ink */
+  color: zColor().optional(),
+  /** 카드 안 로고 표시 배율(기본 1). 로고마다 여백·종횡비가 달라 시각 크기를 맞출 때 사용 */
+  scale: z.number().min(0.2).max(3).optional(),
+});
+
+/**
+ * ChannelPromo inputProps — 채널(바로쇼핑) 홍보용 9:16 쇼츠.
+ * 구성: 로고 인트로 → 차별점(benefits) → 제휴 쇼핑몰(malls) → 구독 CTA.
+ * 길이 = introDuration + benefitsDuration + mallsDuration + ctaDuration.
+ */
+export const promoSchema = z.object({
+  brandName: z.string().default("바로쇼핑"),
+  /** 채널 로고 (public 파일명·URL). 정사각/원형 배지 권장 */
+  logo: z.string(),
+  kicker: z.string().default("유튜브 쇼핑 쇼츠"),
+  headline: z
+    .tuple([z.string(), z.string()])
+    .default(["매일, 검증된", "특가만 골라드려요"]),
+
+  benefitsTitle: z.string().default("왜 바로쇼핑일까?"),
+  benefits: z
+    .array(z.object({ icon: z.string().default("✅"), text: z.string() }))
+    .min(1),
+
+  mallsTitle: z.string().default("이런 쇼핑몰 상품을 소개해요"),
+  malls: z.array(promoMallSchema).default([]),
+  /** 공정위/명목적 사용 표기 — 공식 후원이 아닌 제휴 맥락 명시 */
+  mallsNote: z
+    .string()
+    .default("※ 네이버 쇼핑 커넥트 등 제휴 활동의 일환입니다"),
+
+  ctaTitle: z.tuple([z.string(), z.string()]).default(["구독하고", "매일 특가 받기"]),
+  ctaSub: z.string().default("프로필 링크 · 더보기란에서 바로 구매"),
+
+  bgm: z.string().optional(),
+  bgmVolume: z.number().min(0).max(1).optional(),
+
+  fps: z.number().int().positive().default(30),
+  introDuration: z.number().int().positive().default(105),
+  benefitsDuration: z.number().int().positive().default(165),
+  mallsDuration: z.number().int().positive().default(120),
+  ctaDuration: z.number().int().positive().default(120),
+
+  theme: themeSchema,
+});
+
+export type PromoProps = z.infer<typeof promoSchema>;

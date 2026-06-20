@@ -141,3 +141,95 @@ def test_compose_reel_fallback_captions_without_script():
     caps = [c["caption"] for c in reel["cuts"] if c["caption"]]
     # 스크립트가 없으면 상품 데이터에서 자막 합성 (이름/스펙 기반)
     assert any("수분" in c or "마스크팩" in c for c in caps)
+
+
+# ── 16:9 롱폼(ProductLong) ────────────────────────────────────────────────
+
+_LONG_KEYS = {
+    "brandName", "eyebrow", "image", "hookTitle", "hookSub", "cta", "cuts",
+    "outroTitle", "outroNote", "fps", "introDuration", "perCutDuration",
+    "outroDuration", "theme",
+}
+
+
+def _total_seconds(long_reel: dict) -> float:
+    return (
+        long_reel["introDuration"]
+        + len(long_reel["cuts"]) * long_reel["perCutDuration"]
+        + long_reel["outroDuration"]
+    ) / long_reel["fps"]
+
+
+def test_compose_long_multi_shape_and_duration_window():
+    analysis = {
+        "hook": ["올해 우수상", "받은 선풍기"],
+        "cta": "스마트스토어에서 확인",
+        "cuts": [
+            {"image": (i % 3) + 1, "y": 0.2 * i, "zoom": 1.1, "caption": f"포인트{i}"}
+            for i in range(7)
+        ],
+    }
+    long_reel = imagecut.compose_long_multi(["a.jpg", "b.jpg", "c.jpg"], analysis)
+    assert set(long_reel) == _LONG_KEYS
+    assert long_reel["hookTitle"] == ["올해 우수상", "받은 선풍기"]
+    assert long_reel["image"] == "a.jpg"
+    # 컷마다 1-based image 인덱스가 cut_images로 매핑
+    assert long_reel["cuts"][0]["image"] in {"a.jpg", "b.jpg", "c.jpg"}
+    # 끝화면 요건: 영상이 충분히 길다(≥25초) + 목표 60~90초 구간
+    assert 60.0 <= _total_seconds(long_reel) <= 90.0
+    assert long_reel["outroDuration"] >= 150  # ≥5초 끝화면 세이프존
+
+
+def test_compose_long_multi_per_cut_clamped():
+    # 컷이 아주 많아도 컷당 길이는 4초(120f) 이상으로 클램프
+    analysis = {"cuts": [{"image": 1, "y": 0.5, "caption": "x"} for _ in range(40)]}
+    long_reel = imagecut.compose_long_multi(["only.jpg"], analysis)
+    assert long_reel["perCutDuration"] >= 120
+    assert all(c["image"] == "only.jpg" for c in long_reel["cuts"])  # 범위 밖 인덱스 클램프
+
+
+def test_compose_long_multi_requires_cuts():
+    with pytest.raises(ValueError):
+        imagecut.compose_long_multi(["a.jpg"], {"cuts": []})
+
+
+def test_long_from_reel_reuses_cuts_without_revision():
+    reel = imagecut.compose_reel_multi(
+        ["a.jpg", "b.jpg"],
+        {
+            "hook": ["이 선풍기", "왜 우수상?"],
+            "cta": "스마트스토어 확인",
+            "cuts": [
+                {"image": 1, "y": 0.1, "zoom": 1.2, "caption": "디자인"},
+                {"image": 2, "y": 0.4, "zoom": 1.1, "caption": "스펙"},
+            ],
+        },
+        bgm="bgm.mp3", bgm_volume=0.35,
+    )
+    long_reel = imagecut.long_from_reel(reel)
+    assert set(long_reel) >= _LONG_KEYS  # bgm 키 추가 가능
+    # 쇼츠 컷(밴드/줌/자막/이미지)을 그대로 재사용 → 스토리 일관
+    assert [c["caption"] for c in long_reel["cuts"]] == ["디자인", "스펙"]
+    assert [c["image"] for c in long_reel["cuts"]] == ["a.jpg", "b.jpg"]
+    assert long_reel["hookTitle"] == ["이 선풍기", "왜 우수상?"]
+    assert long_reel["bgm"] == "bgm.mp3" and long_reel["bgmVolume"] == 0.35
+    # 컷이 적으면(2컷) 컷당 상한(10초) 때문에 60초엔 못 미치지만,
+    # 끝화면 표시 요건(영상 ≥25초)은 충족하는 유효 롱폼이어야 한다
+    assert _total_seconds(long_reel) >= 25.0
+    assert long_reel["perCutDuration"] == 300  # 컷당 상한에 도달
+
+
+def test_long_from_reel_requires_cuts():
+    with pytest.raises(ValueError):
+        imagecut.long_from_reel({"cuts": []})
+
+
+def test_long_cover_props_hides_hook_and_overrides_image():
+    long_reel = imagecut.compose_long_multi(["a.jpg", "b.jpg"], {
+        "cuts": [{"image": 1, "y": 0.3, "caption": "x"}, {"image": 2, "y": 0.6, "caption": "y"}]
+    })
+    cover = imagecut.long_cover_props(long_reel, "b.jpg")
+    assert cover["hideHook"] is True
+    assert cover["image"] == "b.jpg"
+    # 원본은 변형하지 않음(shallow copy)
+    assert long_reel.get("hideHook") is None
